@@ -1,4 +1,1 @@
-import zipfile
 
-with zipfile.ZipFile("msk_met_2021.tar.gz", "r") as z:
-    z.extractall("extracted_folder")
