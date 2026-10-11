@@ -1,0 +1,7 @@
+# Python cache
+__pycache__/
+
+# Raw cBioPortal data: 1.1 GB, two files exceed GitHub's 100 MB limit.
+# Re-extract from the tarballs or download from cBioPortal (links in README).
+data/raw/
+data/*.tar.gz
