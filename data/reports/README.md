@@ -128,9 +128,9 @@ samples including ~22% with no MSK-IMPACT genomics. Every later stage uses profi
 | nsclc | EGFR C797S | 0.2% → 1.5% (n=975/266) | 0.3% → 1.9% (n=771/211) | 0.0% → 2.1% (n=561/192) | 0.0% → 2.1% (n=561/192) |  |  |  |  |  |
 | nsclc | EGFR T790M | 1.5% → 27.1% (n=975/266) | 1.9% → 34.1% (n=771/211) | 1.8% → 37.5% (n=561/192) | 1.8% → 37.5% (n=561/192) |  |  |  |  |  |
 | nsclc | EGFR_C797X |  |  |  |  | 0.0% → 2.1% (n=561/192) | 0.0% → 1.8% (n=323/109) | 0.0% → 1.2% (n=323/83) | 0.0% → 1.8% (n=240/109) | 0.0% → 1.2% (n=323/83) |
-| nsclc | EGFR_T790M |  |  |  |  | 1.8% → 37.5% (n=561/192) | 1.9% → 34.9% (n=323/109) | 1.9% → 34.9% (n=323/83) | 1.2% → 34.9% (n=240/109) | 1.9% → 28.9% (n=323/83) |
+| nsclc | EGFR_T790M |  |  |  |  | 1.8% → 37.5% (n=561/192) | 1.9% → 34.9% (n=323/109) | 1.9% → 34.9% (n=323/83) | 1.3% → 34.9% (n=240/109) | 1.9% → 28.9% (n=323/83) |
 | nsclc | MET amplification | 0.8% → 7.1% (n=975/266) | 1.0% → 9.0% (n=771/211) | 0.9% → 9.9% (n=561/192) | 0.9% → 9.9% (n=561/192) |  |  |  |  |  |
-| nsclc | MET_amp |  |  |  |  | 0.9% → 9.9% (n=561/192) | 1.2% → 11.9% (n=323/109) | 1.2% → 13.3% (n=323/83) | 1.2% → 11.9% (n=240/109) | 1.2% → 15.7% (n=323/83) |
+| nsclc | MET_amp |  |  |  |  | 0.9% → 9.9% (n=561/192) | 1.2% → 11.9% (n=323/109) | 1.2% → 13.3% (n=323/83) | 1.3% → 11.9% (n=240/109) | 1.2% → 15.7% (n=323/83) |
 | prostate | AR amplification | 1.3% → 29.1% (n=1,853/601) | 1.7% → 34.9% (n=1,398/501) | 0.8% → 34.9% (n=1,014/501) | 0.8% → 34.9% (n=1,014/501) |  |  |  |  |  |
 | prostate | AR mutation | 0.8% → 8.5% (n=1,853/601) | 1.1% → 10.2% (n=1,398/501) | 0.4% → 8.2% (n=1,014/501) | 0.4% → 8.2% (n=1,014/501) |  |  |  |  |  |
 | prostate | AR_LBD |  |  |  |  | 0.3% → 8.6% (n=1,014/501) | 0.1% → 8.2% (n=704/292) | 0.1% → 6.6% (n=704/121) | 0.2% → 8.2% (n=493/292) | 0.1% → 8.8% (n=704/226) |
@@ -158,8 +158,8 @@ Mutational-signature checks (Section 9.7, samples with ≥ 10 mutations; not mod
 | Breast / endocrine | GAB2_loh | alteration | 15.4 | 57.1 | 12 |
 | Breast / endocrine | MTAP_loh | alteration | 21.2 | 60 | 16 |
 | Breast / endocrine | BAP1_loh | alteration | 20.1 | 42.6 | 245 |
-| Breast / endocrine | ESR1_LBD | variant_target | 1.6 | 23.7 | 67 |
 | Breast / endocrine | ESR1_mut | alteration | 1.6 | 23.7 | 67 |
+| Breast / endocrine | ESR1_LBD | variant_target | 1.6 | 23.7 | 67 |
 | Breast / endocrine | FOXP1_loh | alteration | 17.6 | 39.5 | 220 |
 | Breast / endocrine | PBRM1_loh | alteration | 19.5 | 41 | 239 |
 | Breast / endocrine | ATM_loh | alteration | 40.3 | 61.4 | 451 |

@@ -2,8 +2,8 @@ cohort,feature,block,% pre,% post,n altered (main)
 Breast / endocrine,GAB2_loh,alteration,15.4,57.1,12
 Breast / endocrine,MTAP_loh,alteration,21.2,60.0,16
 Breast / endocrine,BAP1_loh,alteration,20.1,42.6,245
-Breast / endocrine,ESR1_LBD,variant_target,1.6,23.7,67
 Breast / endocrine,ESR1_mut,alteration,1.6,23.7,67
+Breast / endocrine,ESR1_LBD,variant_target,1.6,23.7,67
 Breast / endocrine,FOXP1_loh,alteration,17.6,39.5,220
 Breast / endocrine,PBRM1_loh,alteration,19.5,41.0,239
 Breast / endocrine,ATM_loh,alteration,40.3,61.4,451

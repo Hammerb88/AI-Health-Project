@@ -1,0 +1,330 @@
+run_all.py  2026-10-13 00:10  args: --add-missing-columns
+
+== Setup check ==
+Python 3.11.5  (C:\Users\benhr\anaconda34\python.exe)
+Packages:
+  [ok] pandas        2.3.3
+  [ok] numpy         1.26.3
+  [ok] matplotlib    3.8.0
+  [ok] pyarrow       11.0.0
+  [ok] scipy         1.11.4
+  [ok] lifelines     0.30.3
+  [ok] upsetplot     0.9.0
+  [ok] nbconvert     7.16.6
+  [ok] ipykernel     6.28.0
+  [ok] pyyaml        6.0.1
+  [ok] scikit-learn  1.2.2
+Data folders:
+  [ok] raw/msk_met_2021           MSK-MET
+  [ok] raw/msk_impact_50k_2026    MSK-IMPACT 50K
+  [ok] raw/msk_chord_2024         MSK-CHORD
+  [ok] config/  all 5 files present
+  [ok] raw/panels/  all 4 panel files present
+Data columns:
+  [!!] raw/msk_impact_50k_2026/data_clinical_sample.txt has no FACETS_WGD column; similar columns it does have: FACETS_QC, FACETS_PLOIDY, ASCN_WGD
+  [ok] raw/msk_impact_50k_2026/data_clinical_patient.txt
+  [ok] raw/msk_chord_2024/data_clinical_sample.txt
+  [ok] raw/msk_chord_2024/data_clinical_patient.txt
+Adding the missing columns from cBioPortal:
+  fetching FACETS_WGD for msk_impact_50k_2026 from cBioPortal (can take a minute) ...
+  [ok] FACETS_WGD: values for 53,654 of 54,331 rows (53,654 in cBioPortal's current release)
+  original kept as raw/msk_impact_50k_2026/data_clinical_sample.txt.orig
+Data columns, re-checked:
+  [ok] raw/msk_impact_50k_2026/data_clinical_sample.txt
+  [ok] raw/msk_impact_50k_2026/data_clinical_patient.txt
+  [ok] raw/msk_chord_2024/data_clinical_sample.txt
+  [ok] raw/msk_chord_2024/data_clinical_patient.txt
+
+== Running ==
+The pipeline steps take about 10 minutes in total (plus about 2 minutes this first time, to build the parquet cache).
+[1/11] build_features: already built (use --rebuild to redo)
+[2/11] fig_cohort_overview: running  (python.exe fig_cohort_overview.py)
+    C:\Users\benhr\anaconda34\Lib\site-packages\pandas\core\arrays\masked.py:61: UserWarning: Pandas requires version '1.3.6' or newer of 'bottleneck' (version '1.3.5' currently installed).
+      from pandas.core import (
+    {'M': 324, 'I': 16176, 'C': 5011, 'MI': 12436, 'MC': 372, 'IC': 6924, 'MIC': 12643}
+                                patients  metastatic    tx_n
+    CANCER_TYPE                                             
+    Non-Small Cell Lung Cancer      4183        3128  3818.0
+    Colorectal Cancer               3209        2439  2798.0
+    Breast Cancer                   2322        1506  1968.0
+    Prostate Cancer                 1674        1235  1409.0
+    Pancreatic Cancer               1651        1405  1317.0
+    Endometrial Cancer              1171         743     3.0
+    Ovarian Cancer                  1030         949     0.0
+    Melanoma                        1021         738     0.0
+[2/11] fig_cohort_overview: done in 3s
+[3/11] fig_event_order: running  (python.exe fig_event_order.py)
+    C:\Users\benhr\anaconda34\Lib\site-packages\pandas\core\arrays\masked.py:61: UserWarning: Pandas requires version '1.3.6' or newer of 'bottleneck' (version '1.3.5' currently installed).
+      from pandas.core import (
+                            patients  two_plus_samples  dated_pre_post_pairs   pct
+    order                                                                         
+    Dx → Met → Sample → Tx      3227               289                     4  28.2
+    Dx → Sample → Met → Tx      2250               206                     7  19.7
+    Dx → Met → Tx → Sample      1653               179                     1  14.4
+    Dx → Sample → Tx            1051                72                     0   9.2
+    Dx → Sample → Tx → Met       760                91                     1   6.6
+    Dx → Tx → Met → Sample       746                64                     0   6.5
+    Dx → Met → Sample            703                20                     0   6.1
+    Dx → Sample                  615                17                     0   5.4
+    Dx → Sample → Met            181                 9                     0   1.6
+    Dx → Tx → Sample → Met       101                20                     0   0.9
+    Dx → Tx → Sample              95                 7                     0   0.8
+    Sample → Dx → Met → Tx        28                 5                     0   0.2
+    Sample → Dx → Tx              11                 2                     0   0.1
+    Sample → Dx → Met              7                 1                     0   0.1
+    Sample → Dx → Tx → Met         6                 3                     0   0.1
+    Sample → Dx                    4                 0                     0   0.0
+    Sample → Met → Dx → Tx         3                 0                     0   0.0
+    
+    patients: 11,441
+[3/11] fig_event_order: done in 3s
+[4/11] fig_event_sankey: running  (python.exe fig_event_sankey.py)
+    C:\Users\benhr\anaconda34\Lib\site-packages\pandas\core\arrays\masked.py:61: UserWarning: Pandas requires version '1.3.6' or newer of 'bottleneck' (version '1.3.5' currently installed).
+      from pandas.core import (
+    patients: 11,441
+[4/11] fig_event_sankey: done in 3s
+[5/11] fig_event_timing: running  (python.exe fig_event_timing.py)
+    C:\Users\benhr\anaconda34\Lib\site-packages\pandas\core\arrays\masked.py:61: UserWarning: Pandas requires version '1.3.6' or newer of 'bottleneck' (version '1.3.5' currently installed).
+      from pandas.core import (
+                     n  median  within30
+    step                                
+    Met → Sample  4676     0.0  0.824850
+    Dx → Sample   4857    10.0  0.716903
+    Met → Tx      3931    13.0  0.754261
+    Dx → Met      5618    27.0  0.542542
+    Sample → Met  2535    28.0  0.526233
+    Sample → Tx   5038    34.0  0.434696
+    Dx → Tx        962    49.0  0.284823
+    Tx → Met      1512   128.0  0.199074
+    Tx → Sample   1849   305.0  0.164954
+[5/11] fig_event_timing: done in 3s
+[6/11] exposure: running  (python.exe exposure.py)
+    C:\Users\benhr\anaconda34\Lib\site-packages\pandas\core\arrays\masked.py:61: UserWarning: Pandas requires version '1.3.6' or newer of 'bottleneck' (version '1.3.5' currently installed).
+      from pandas.core import (
+      [ok] 1. every treatment agent maps to a class or 'other'
+      [ok] 2. no class exposure before primary dx - 30 d is used
+      [ok] 3. class_start <= every episode start; merged episodes do not overlap
+    wrote C:\Users\benhr\Downloads\AI-Health-Project\data\derived\exposure.parquet (11,498 rows)
+[6/11] exposure: done in 58s
+[7/11] build_cohort: running  (python.exe build_cohort.py)
+    C:\Users\benhr\anaconda34\Lib\site-packages\pandas\core\arrays\masked.py:61: UserWarning: Pandas requires version '1.3.6' or newer of 'bottleneck' (version '1.3.5' currently installed).
+      from pandas.core import (
+    [cache] building mutations.parquet (one-time parse of raw text)
+      [ok] 1. every treatment agent maps to a class or 'other'
+    [cache] building cna_long.parquet (one-time parse of raw text)
+      nsclc EGFR-sensitizing share before restriction: 87.0%
+      [ok] 4a. label A has no samples with 0 < t_days <= 90
+      [ok] 4b. label B is 0 exactly for t_days <= 0 (and > 0 for every post sample)
+      [ok] 5. labels are relative to the cohort class (20 patients with prior therapy spot-checked; first therapy of any class precedes class_start in all)
+      [ok] 6a. one sample per patient per cohort
+      [ok] 6b. no label-0 sample has PRIOR_MED_TO_MSK == 'Prior medications to MSK' (any tier)
+      [ok] 7a. breast cohort is 100% HR-positive
+      [ok] 7b. NSCLC cohort >= 95% EGFR-sensitizing
+      [ok] 7c. adjuvant_start is non-null for every sample
+      [ok] 7c. metastatic_at_collection is non-null for every sample
+      [ok] 7c. sex is non-null for every sample
+    
+    Section 2.1 counts, relative difference vs plan:
+              samples  t_le_0  t_0_90  t_gt_90  t_gt_90_on_class  strict_t_le_0  strict_t_gt_90  strict_t_gt_90_no_between
+    cohort                                                                                                                
+    breast       -0.1     0.6     0.7     -2.2               0.0            2.4             3.8                       25.0
+    nsclc        -0.1     0.1     0.0     -0.7              -1.0            2.1             1.7                        8.7
+    prostate      0.0     0.1     0.0     -0.2              -0.2            1.4             0.7                       12.6
+    crc          -0.3     0.1    -2.3     -2.3               0.0            1.5            -1.0                       33.2
+      [ok] M1: Section 2.1 loose counts reproduce within 2.5% (max 2.3%)
+    
+    Section 2.2 controls (raw calls):
+      cohort           control                stage  n_pre  n_post  pct_pre  plan_pct_pre  pct_post  plan_pct_post
+      breast     ESR1 mutation raw_plan_denominator   2655    1046      2.6           2.5      14.3           14.3
+      breast     ESR1 mutation                  raw   2329     835      3.0           2.5      18.0           14.3
+       nsclc        EGFR T790M raw_plan_denominator    975     266      1.5           1.5      27.1           26.9
+       nsclc        EGFR C797S raw_plan_denominator    975     266      0.2           0.3       1.5            1.5
+       nsclc MET amplification raw_plan_denominator    975     266      0.8           0.8       7.1            7.1
+       nsclc        EGFR T790M                  raw    771     211      1.9           1.5      34.1           26.9
+       nsclc        EGFR C797S                  raw    771     211      0.3           0.3       1.9            1.5
+       nsclc MET amplification                  raw    771     211      1.0           0.8       9.0            7.1
+    prostate  AR amplification raw_plan_denominator   1853     601      1.3           1.3      29.1           29.1
+    prostate       AR mutation raw_plan_denominator   1853     601      0.8           0.8       8.5            8.5
+    prostate  AR amplification                  raw   1398     501      1.7           1.3      34.9           29.1
+    prostate       AR mutation                  raw   1398     501      1.1           0.8      10.2            8.5
+         crc     KRAS mutation raw_plan_denominator   2819     598     35.7          35.7      38.3           37.9
+         crc     KRAS mutation                  raw   2213     497     45.5          35.7      46.1           37.9
+      [ok] M1: Section 2.2 prevalences reproduce within 2 percentage points with the plan's denominator (max 0.39 pp)
+      [ok] 2.2 control ESR1 mutation (breast) enriched post-treatment (3.0% -> 18.0%)
+      [ok] 2.2 control EGFR T790M (nsclc) enriched post-treatment (1.9% -> 34.1%)
+      [ok] 2.2 control EGFR C797S (nsclc) enriched post-treatment (0.3% -> 1.9%)
+      [ok] 2.2 control MET amplification (nsclc) enriched post-treatment (1.0% -> 9.0%)
+      [ok] 2.2 control AR amplification (prostate) enriched post-treatment (1.7% -> 34.9%)
+      [ok] 2.2 control AR mutation (prostate) enriched post-treatment (1.1% -> 10.2%)
+      [ok] 2.2 negative control KRAS mutation (crc) not enriched (45.5% -> 46.1%)
+[7/11] build_cohort: done in 1m02s
+[8/11] build_alterations: running  (python.exe build_alterations.py)
+    C:\Users\benhr\anaconda34\Lib\site-packages\pandas\core\arrays\masked.py:61: UserWarning: Pandas requires version '1.3.6' or newer of 'bottleneck' (version '1.3.5' currently installed).
+      from pandas.core import (
+    [cache] building ascna_long.parquet (one-time parse of raw text)
+      [ok] 8. no alteration feature is non-missing where the gene is off the sample's panel
+      [ok] 10. clonality / CCF use only mutations with ASCN.FACETS_QC_PASSED == True
+    [cache] building seg.parquet (one-time parse of raw text)
+      FGA vs MSK-MET: r = 0.995 on 4,425 cohort samples, r = 0.996 on all 25,037 overlapping samples
+      [ok] 12. computed FGA correlates r > 0.95 with MSK-MET FGA (FGA vs MSK-MET: r = 0.995 on 4,425 cohort samples, r = 0.996 on all 25,037 overlapping samples)
+      signature check crc Signature 17 (5-FU): mean 0.009 pre -> 0.053 post (n=421/109, >=10 mutations)
+      signature check breast APOBEC (2+13): mean 0.570 pre -> 0.584 post (n=77/124, >=10 mutations)
+      [ok] 14. ESR1 mutation (breast) enriched post after onco filter + panel mask (1.4% -> 16.3%)
+      [ok] 14. ESR1_LBD (AI subclass) (breast) enriched post after onco filter + panel mask (1.3% -> 18.2%)
+      [ok] 14. EGFR T790M (nsclc) enriched post after onco filter + panel mask (1.8% -> 37.5%)
+      [ok] 14. EGFR C797S (nsclc) enriched post after onco filter + panel mask (0.0% -> 2.1%)
+      [ok] 14. MET amplification (nsclc) enriched post after onco filter + panel mask (0.9% -> 9.9%)
+      [ok] 14. AR amplification (prostate) enriched post after onco filter + panel mask (0.8% -> 34.9%)
+      [ok] 14. AR mutation (prostate) enriched post after onco filter + panel mask (0.4% -> 8.2%)
+      [ok] 14. KRAS mutation (crc) not enriched after onco filter + panel mask (40.9% -> 41.9%)
+    wrote alteration matrix (7293, 2095)
+[8/11] build_alterations: done in 3m21s
+[9/11] preprocess: running  (python.exe preprocess.py)
+    C:\Users\benhr\anaconda34\Lib\site-packages\pandas\core\arrays\masked.py:61: UserWarning: Pandas requires version '1.3.6' or newer of 'bottleneck' (version '1.3.5' currently installed).
+      from pandas.core import (
+      [ok] 11. no signature / OncoKB evidence / treatment field / n_mutations_oncogenic in the alteration block
+      [ok] leakage: no Target-A covariate separates the label alone (max single-covariate AUC 0.84: biopsy_organ_coarse=primary_organ, prostate)
+      [ok] leakage guard: post-start exposure variables are kept out of the Target-A covariates
+      [ok] 17. ESR1_LBD (AI subclass) enriched post [strict] (1.5% -> 27.1%, n=588/129)
+      [ok] 17. EGFR_T790M enriched post [strict] (1.9% -> 34.9%, n=323/109)
+      [ok] 17. MET_amp enriched post [strict] (1.2% -> 11.9%, n=323/109)
+      [ok] 17. AR_amp enriched post [strict] (0.7% -> 31.8%, n=704/292)
+      [ok] 17. AR_LBD enriched post [strict] (0.1% -> 8.2%, n=704/292)
+      [ok] 17. KRAS not enriched [strict] (41.8% -> 39.7%)
+      [ok] 17. ESR1_LBD (AI subclass) enriched post [strict_noint] (1.5% -> 24.3%, n=588/74)
+      [ok] 17. EGFR_T790M enriched post [strict_noint] (1.9% -> 34.9%, n=323/83)
+      [ok] 17. MET_amp enriched post [strict_noint] (1.2% -> 13.3%, n=323/83)
+      [ok] 17. AR_amp enriched post [strict_noint] (0.7% -> 16.5%, n=704/121)
+      [ok] 17. AR_LBD enriched post [strict_noint] (0.1% -> 6.6%, n=704/121)
+      [ok] 17. KRAS not enriched [strict_noint] (41.8% -> 43.2%)
+      [ok] 17. ESR1_LBD (AI subclass) enriched post [relaxed] (1.3% -> 18.2%, n=1251/462)
+      [ok] 17. EGFR_T790M enriched post [relaxed] (1.8% -> 37.5%, n=561/192)
+      [ok] 17. MET_amp enriched post [relaxed] (0.9% -> 9.9%, n=561/192)
+      [ok] 17. AR_amp enriched post [relaxed] (0.8% -> 34.9%, n=1014/501)
+      [ok] 17. AR_LBD enriched post [relaxed] (0.3% -> 8.6%, n=1014/501)
+      [ok] 17. KRAS not enriched [relaxed] (40.9% -> 41.9%)
+      [ok] 17. ESR1_LBD (AI subclass) enriched post [S3_survivorship_strict] (1.6% -> 27.1%, n=425/129)
+      [ok] 17. EGFR_T790M enriched post [S3_survivorship_strict] (1.3% -> 34.9%, n=240/109)
+      [ok] 17. MET_amp enriched post [S3_survivorship_strict] (1.3% -> 11.9%, n=240/109)
+      [ok] 17. AR_amp enriched post [S3_survivorship_strict] (0.4% -> 31.8%, n=493/292)
+      [ok] 17. AR_LBD enriched post [S3_survivorship_strict] (0.2% -> 8.2%, n=493/292)
+      [ok] 17. KRAS not enriched [S3_survivorship_strict] (40.4% -> 39.7%)
+      [ok] [breast] only LOH features have unmeasured cells among IMPACT341 genes (155 LOH features moved to the secondary analysis)
+      [ok] 9. [breast] main-analysis alteration features are all on IMPACT341 (no NA)
+      [ok] [breast] folds are patient-grouped
+      [ok] [breast] in-fold preprocessor fits on training rows and yields a complete design matrix (117 columns)
+      [ok] [nsclc] only LOH features have unmeasured cells among IMPACT341 genes (155 LOH features moved to the secondary analysis)
+      [ok] 9. [nsclc] main-analysis alteration features are all on IMPACT341 (no NA)
+      [ok] [nsclc] folds are patient-grouped
+      [ok] [nsclc] in-fold preprocessor fits on training rows and yields a complete design matrix (85 columns)
+      [ok] [prostate] only LOH features have unmeasured cells among IMPACT341 genes (155 LOH features moved to the secondary analysis)
+      [ok] 9. [prostate] main-analysis alteration features are all on IMPACT341 (no NA)
+      [ok] [prostate] folds are patient-grouped
+      [ok] [prostate] in-fold preprocessor fits on training rows and yields a complete design matrix (80 columns)
+      [ok] [crc] only LOH features have unmeasured cells among IMPACT341 genes (155 LOH features moved to the secondary analysis)
+      [ok] 9. [crc] main-analysis alteration features are all on IMPACT341 (no NA)
+    C:\Users\benhr\anaconda34\Lib\site-packages\sklearn\model_selection\_split.py:909: UserWarning: The least populated class in y has only 1 members, which is less than n_splits=5.
+      warnings.warn(
+    C:\Users\benhr\anaconda34\Lib\site-packages\sklearn\model_selection\_split.py:909: UserWarning: The least populated class in y has only 1 members, which is less than n_splits=5.
+      warnings.warn(
+    C:\Users\benhr\anaconda34\Lib\site-packages\sklearn\model_selection\_split.py:909: UserWarning: The least populated class in y has only 1 members, which is less than n_splits=5.
+      warnings.warn(
+    C:\Users\benhr\anaconda34\Lib\site-packages\sklearn\model_selection\_split.py:909: UserWarning: The least populated class in y has only 1 members, which is less than n_splits=5.
+      warnings.warn(
+    C:\Users\benhr\anaconda34\Lib\site-packages\sklearn\model_selection\_split.py:909: UserWarning: The least populated class in y has only 1 members, which is less than n_splits=5.
+      warnings.warn(
+    C:\Users\benhr\anaconda34\Lib\site-packages\sklearn\model_selection\_split.py:909: UserWarning: The least populated class in y has only 1 members, which is less than n_splits=5.
+      warnings.warn(
+    C:\Users\benhr\anaconda34\Lib\site-packages\sklearn\model_selection\_split.py:909: UserWarning: The least populated class in y has only 1 members, which is less than n_splits=5.
+      warnings.warn(
+    C:\Users\benhr\anaconda34\Lib\site-packages\sklearn\model_selection\_split.py:909: UserWarning: The least populated class in y has only 1 members, which is less than n_splits=5.
+      warnings.warn(
+    C:\Users\benhr\anaconda34\Lib\site-packages\sklearn\model_selection\_split.py:909: UserWarning: The least populated class in y has only 1 members, which is less than n_splits=5.
+      warnings.warn(
+    C:\Users\benhr\anaconda34\Lib\site-packages\sklearn\model_selection\_split.py:909: UserWarning: The least populated class in y has only 1 members, which is less than n_splits=5.
+      warnings.warn(
+    C:\Users\benhr\anaconda34\Lib\site-packages\sklearn\model_selection\_split.py:909: UserWarning: The least populated class in y has only 1 members, which is less than n_splits=5.
+      warnings.warn(
+    C:\Users\benhr\anaconda34\Lib\site-packages\sklearn\model_selection\_split.py:909: UserWarning: The least populated class in y has only 1 members, which is less than n_splits=5.
+      warnings.warn(
+    C:\Users\benhr\anaconda34\Lib\site-packages\sklearn\model_selection\_split.py:909: UserWarning: The least populated class in y has only 1 members, which is less than n_splits=5.
+      warnings.warn(
+    C:\Users\benhr\anaconda34\Lib\site-packages\sklearn\model_selection\_split.py:909: UserWarning: The least populated class in y has only 1 members, which is less than n_splits=5.
+      warnings.warn(
+    C:\Users\benhr\anaconda34\Lib\site-packages\sklearn\model_selection\_split.py:909: UserWarning: The least populated class in y has only 1 members, which is less than n_splits=5.
+      warnings.warn(
+    C:\Users\benhr\anaconda34\Lib\site-packages\sklearn\model_selection\_split.py:909: UserWarning: The least populated class in y has only 1 members, which is less than n_splits=5.
+      warnings.warn(
+    C:\Users\benhr\anaconda34\Lib\site-packages\sklearn\model_selection\_split.py:909: UserWarning: The least populated class in y has only 1 members, which is less than n_splits=5.
+      warnings.warn(
+    C:\Users\benhr\anaconda34\Lib\site-packages\sklearn\model_selection\_split.py:909: UserWarning: The least populated class in y has only 1 members, which is less than n_splits=5.
+      warnings.warn(
+    C:\Users\benhr\anaconda34\Lib\site-packages\sklearn\model_selection\_split.py:909: UserWarning: The least populated class in y has only 1 members, which is less than n_splits=5.
+      warnings.warn(
+    C:\Users\benhr\anaconda34\Lib\site-packages\sklearn\model_selection\_split.py:909: UserWarning: The least populated class in y has only 1 members, which is less than n_splits=5.
+      warnings.warn(
+      [ok] [crc] folds are patient-grouped
+      [ok] [crc] in-fold preprocessor fits on training rows and yields a complete design matrix (104 columns)
+      [ok] [pooled] only LOH features have unmeasured cells among IMPACT341 genes (155 LOH features moved to the secondary analysis)
+      [ok] 9. [pooled] main-analysis alteration features are all on IMPACT341 (no NA)
+      [ok] [pooled] folds are patient-grouped
+      [ok] 13. arm_altered_fraction does not exist in any output
+    C:\Users\benhr\Downloads\AI-Health-Project\data\preprocess.py:437: FutureWarning: Downcasting object dtype arrays on .fillna, .ffill, .bfill is deprecated and will change in a future version. Call result.infer_objects(copy=False) instead. To opt-in to the future behavior, set `pd.set_option('future.no_silent_downcasting', True)`
+      nfirth = {c: int(fdict.get(f"{c}_kept_firth", pd.Series(dtype=bool)).fillna(False).astype(bool).sum())
+    C:\Users\benhr\Downloads\AI-Health-Project\data\preprocess.py:437: FutureWarning: Downcasting object dtype arrays on .fillna, .ffill, .bfill is deprecated and will change in a future version. Call result.infer_objects(copy=False) instead. To opt-in to the future behavior, set `pd.set_option('future.no_silent_downcasting', True)`
+      nfirth = {c: int(fdict.get(f"{c}_kept_firth", pd.Series(dtype=bool)).fillna(False).astype(bool).sum())
+    C:\Users\benhr\Downloads\AI-Health-Project\data\preprocess.py:437: FutureWarning: Downcasting object dtype arrays on .fillna, .ffill, .bfill is deprecated and will change in a future version. Call result.infer_objects(copy=False) instead. To opt-in to the future behavior, set `pd.set_option('future.no_silent_downcasting', True)`
+      nfirth = {c: int(fdict.get(f"{c}_kept_firth", pd.Series(dtype=bool)).fillna(False).astype(bool).sum())
+    C:\Users\benhr\Downloads\AI-Health-Project\data\preprocess.py:437: FutureWarning: Downcasting object dtype arrays on .fillna, .ffill, .bfill is deprecated and will change in a future version. Call result.infer_objects(copy=False) instead. To opt-in to the future behavior, set `pd.set_option('future.no_silent_downcasting', True)`
+      nfirth = {c: int(fdict.get(f"{c}_kept_firth", pd.Series(dtype=bool)).fillna(False).astype(bool).sum())
+    C:\Users\benhr\Downloads\AI-Health-Project\data\preprocess.py:437: FutureWarning: Downcasting object dtype arrays on .fillna, .ffill, .bfill is deprecated and will change in a future version. Call result.infer_objects(copy=False) instead. To opt-in to the future behavior, set `pd.set_option('future.no_silent_downcasting', True)`
+      nfirth = {c: int(fdict.get(f"{c}_kept_firth", pd.Series(dtype=bool)).fillna(False).astype(bool).sum())
+    model tables: {'breast': (2607, 1617), 'nsclc': (753, 1002), 'prostate': (1515, 1420), 'crc': (2418, 1738), 'pooled': (7293, 2150)}
+[9/11] preprocess: done in 4m03s
+[10/11] report: running  (python.exe report.py)
+    C:\Users\benhr\anaconda34\Lib\site-packages\pandas\core\arrays\masked.py:61: UserWarning: Pandas requires version '1.3.6' or newer of 'bottleneck' (version '1.3.5' currently installed).
+      from pandas.core import (
+      [ok] 1. every treatment agent maps to a class or 'other'
+    wrote C:\Users\benhr\Downloads\AI-Health-Project\data\reports\README.md
+[10/11] report: done in 4s
+[11/11] notebook: running  (python.exe -m nbconvert --to html --execute --ExecutePreprocessor.timeout=-1 --ExecutePreprocessor.kernel_name=python3 --output-dir reports data_exploration.ipynb)
+    [NbConvertApp] Converting notebook data_exploration.ipynb to html
+    0.00s - Debugger warning: It seems that frozen modules are being used, which may
+    0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off
+    0.00s - to python to disable frozen modules.
+    0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.
+    0.00s - Debugger warning: It seems that frozen modules are being used, which may
+    0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off
+    0.00s - to python to disable frozen modules.
+    0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.
+    [NbConvertApp] Writing 617021 bytes to reports\data_exploration.html
+[11/11] notebook: done in 18s
+
+== Summary ==
+  ok       build_features       already built
+  ok       fig_cohort_overview  3s
+  ok       fig_event_order      3s
+  ok       fig_event_sankey     3s
+  ok       fig_event_timing     3s
+  ok       exposure             58s
+  ok       build_cohort         1m02s
+  ok       build_alterations    3m21s
+  ok       preprocess           4m03s
+  ok       report               4s
+  ok       notebook             18s
+
+Figures in reports/  (new = made by this run, old = left over from an earlier run and not updated):
+  [new    ] fig_cohort_overview.png
+  [new    ] fig_metastatic_spread.png
+  [new    ] fig_event_order.png
+  [new    ] fig_event_sankey.png
+  [new    ] fig_event_timing.png
+  [new    ] F1_attrition.png
+  [new    ] F2_sampling_time.png
+  [new    ] F4_covariate_balance.png
+  [new    ] F5_panel_confounding.png
+  [new    ] F6_controls.png
+  [new    ] data_exploration.html
+
+== What's left to do ==
+  Nothing. All 11 figures are in reports/.

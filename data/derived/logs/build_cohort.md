@@ -1,6 +1,6 @@
 # build_cohort
 
-_Written 2026-10-12 15:11_
+_Written 2026-10-13 00:13_
 
 Stages 3-4 (build_cohort.py). Started from 25,040 dated MSK-CHORD samples and
 11,498 patient x class exposure rows. Wrote 7,293 samples (one per patient per

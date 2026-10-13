@@ -1,6 +1,6 @@
 # build_alterations
 
-_Written 2026-10-12 15:20_
+_Written 2026-10-13 00:16_
 
 Stages 5-6 (build_alterations.py). Oncogenicity source: **rules_v1** (rule-based fallback;
 data/raw/oncokb/ is empty). Rules derived from all 51,191 MSK-IMPACT 50K

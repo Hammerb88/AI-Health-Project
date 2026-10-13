@@ -1,6 +1,6 @@
 # exposure
 
-_Written 2026-10-12 15:10_
+_Written 2026-10-13 00:12_
 
 Stage 2 (exposure.py). Read 134,943 MSK-CHORD treatment rows (245 agents,
 all mapped to a class). Wrote 11,498 patient x cohort-class rows to `derived/exposure.parquet`.
