@@ -1,0 +1,30 @@
+# Variant-level features for drug-target genes (data_cleaning_plan.md 9.3).
+# Always kept regardless of the prevalence filter. Types:
+#   hgvsp:        HGVSp_Short in `values` (exact match, "p." prefix included)
+#   hgvsp_regex:  HGVSp_Short matches `pattern`
+#   missense_at:  Missense_Mutation at one of `residues` (amino-acid + position)
+#   cna:          discrete CNA == `value`
+#   sv_partner:   any SV with `gene` as either partner
+#   mut_any:      any mutation in `gene` that passes the oncogenicity filter
+cohorts:
+  nsclc:
+    EGFR_T790M:       {type: hgvsp, gene: EGFR, values: [p.T790M]}
+    EGFR_C797X:       {type: hgvsp_regex, gene: EGFR, pattern: '^p\.C797[A-Z]$'}
+    # ex19del = in-frame deletion (or delins) starting in codons 729-761; L858R
+    EGFR_sensitizing: {type: egfr_sensitizing, gene: EGFR}
+    MET_amp:          {type: cna, gene: MET, value: 2}
+    ERBB2_amp:        {type: cna, gene: ERBB2, value: 2}
+  breast:
+    ESR1_LBD:    {type: missense_at, gene: ESR1, residues: [E380, V422, S463, L536, Y537, D538]}
+    ESR1_fusion: {type: sv_partner, gene: ESR1}
+  prostate:
+    # T878 (legacy T877) etc.; MSK-IMPACT reports current (NM_000044) numbering
+    AR_LBD:      {type: missense_at, gene: AR, residues: [L702, W742, H875, F877, T878]}
+    AR_amp:      {type: cna, gene: AR, value: 2}
+    # AR_enhancer is upstream of AR and not tiled by MSK-IMPACT, so it is not
+    # captured; AR rearrangements (either SV partner) are kept instead.
+    AR_sv:       {type: sv_partner, gene: AR}
+  crc:
+    KRAS_any:   {type: mut_any, gene: KRAS}
+    NRAS_any:   {type: mut_any, gene: NRAS}
+    BRAF_V600E: {type: hgvsp, gene: BRAF, values: [p.V600E]}

@@ -1,0 +1,183 @@
+site,n_samples,organ_group
+Adrenal Gland,76,Adrenal
+Adrenal,24,Adrenal
+Bone,970,Bone
+Iliac Bone,79,Bone
+Spine,57,Bone
+Rib,34,Bone
+Spine (Bone),29,Bone
+Epidural,24,Bone
+Vertebrate,23,Bone
+Sternum,22,Bone
+Femur,18,Bone
+Sacrum,11,Bone
+Scapula,11,Bone
+Sacral Mass,9,Bone
+Vertebrae,7,Bone
+Humerus,6,Bone
+Bone (Femur),5,Bone
+Skull,4,Bone
+Epidural Mass,4,Bone
+Pubic Mass,2,Bone
+Right Iliac Bone,2,Bone
+Iliac,1,Bone
+Skull Base,1,Bone
+Left Iliac Bone,1,Bone
+"Bone,Hip",1,Bone
+"Bone,Iliac Bone",1,Bone
+Tibia,1,Bone
+"Spine,Bone",1,Bone
+"Bone,Femur",1,Bone
+Bone Marrow,1,Bone
+T6,1,Bone
+Brain,363,Brain/CNS
+Csf,31,Brain/CNS
+Cerebellum,16,Brain/CNS
+Brain - Dura,4,Brain/CNS
+Left Frontal Brain,2,Brain/CNS
+Spinal Cord,1,Brain/CNS
+Brain - Cerebellum,1,Brain/CNS
+Cerebrospinal Fluid,1,Brain/CNS
+Central Nervous System,1,Brain/CNS
+Breast,5370,Breast
+Ipsilateral Breast,3,Breast
+Colon,2533,Colorectal
+Rectum,1268,Colorectal
+Sigmoid Colon,550,Colorectal
+Ascending Colon,318,Colorectal
+Cecum,267,Colorectal
+Rectosigmoid Colon,258,Colorectal
+Transverse Colon,138,Colorectal
+Descending Colon,133,Colorectal
+Bowel,94,Colorectal
+Small Bowel,10,Colorectal
+Hepatic Flexure,7,Colorectal
+"Rectum,Colon",1,Colorectal
+Left Colon,1,Colorectal
+"Rectosigmoid Colon,Bowel",1,Colorectal
+Pancreas,3113,GI tract/viscera
+Stomach,18,GI tract/viscera
+Duodenum,10,GI tract/viscera
+Appendix,4,GI tract/viscera
+Esophagus,3,GI tract/viscera
+Anus,2,GI tract/viscera
+Spleen,1,GI tract/viscera
+Ileum,1,GI tract/viscera
+Peripancreatic,1,GI tract/viscera
+Bile Duct,1,GI tract/viscera
+Ge Junction,1,GI tract/viscera
+Bladder,34,Genitourinary
+Kidney,11,Genitourinary
+Small Intestine,9,Genitourinary
+Testis,5,Genitourinary
+Ureter,4,Genitourinary
+Gallbladder,2,Genitourinary
+Urethra,2,Genitourinary
+Bladder Wall,2,Genitourinary
+Upper Tract,2,Genitourinary
+Bladder Neck,1,Genitourinary
+Scrotum,1,Genitourinary
+Ovary,88,Gynecologic
+Uterus,8,Gynecologic
+Vagina,7,Gynecologic
+Adnexa Or Endomterium,5,Gynecologic
+Cervix,2,Gynecologic
+Vulva,2,Gynecologic
+Uterus/Cervix,2,Gynecologic
+Fallopian Tube,1,Gynecologic
+Ovary And Fallopian Tube,1,Gynecologic
+Adnexa Or Endometrium,1,Gynecologic
+Adnexa Or,1,Gynecologic
+Liver,2453,Liver
+Lung,8311,Lung
+Endobronchial,1,Lung
+Lung - Right Upper,1,Lung
+Lymph Node,1936,Lymph node
+Axilla,37,Lymph node
+Ln,8,Lymph node
+Hilar Ln,3,Lymph node
+Axillary Mass,1,Lymph node
+Right Retroperitoneal Lymph Node,1,Lymph node
+Retroperitoneal Lymph Node,1,Lymph node
+Left Axilla,1,Lymph node
+"Retroperitoneum,Lymph Node",1,Lymph node
+"Neck,Lymph Node",1,Lymph node
+Axillary Lypmh Nodes,1,Lymph node
+"Lymph Node,Axilla",1,Lymph node
+Left Axila,1,Lymph node
+Paraspinal,4,Other
+Parasternal Mass,1,Other
+Intercostal Space,1,Other
+Paraspinal Mass,1,Other
+Right Hip,1,Other
+Hip,1,Other
+Peritoneum,143,Peritoneum/abdomen
+Omentum,68,Peritoneum/abdomen
+Pelvis,65,Peritoneum/abdomen
+Retroperitoneum,65,Peritoneum/abdomen
+Abdomen,34,Peritoneum/abdomen
+Abdominal Wall,21,Peritoneum/abdomen
+Mesentery,14,Peritoneum/abdomen
+Diaphragm,14,Peritoneum/abdomen
+Peritoneal Fluid,7,Peritoneum/abdomen
+Peritoneal Implant,5,Peritoneum/abdomen
+Pelvic Nodule,4,Peritoneum/abdomen
+Retroperitoneal Lnd,2,Peritoneum/abdomen
+Paracolic Gutter,1,Peritoneum/abdomen
+Ruq,1,Peritoneum/abdomen
+Diaphram,1,Peritoneum/abdomen
+Hernia Sac,1,Peritoneum/abdomen
+Peritonuem,1,Peritoneum/abdomen
+Right Upper Quadrant Peritoneum,1,Peritoneum/abdomen
+Peritonenum,1,Peritoneum/abdomen
+Diaphragm Nodule,1,Peritoneum/abdomen
+"Soft Tissue,Pelvis",1,Peritoneum/abdomen
+"Soft Tissue,Abdominal Wall",1,Peritoneum/abdomen
+"Pelvis,Soft Tissue",1,Peritoneum/abdomen
+"Abdomen,Soft Tissue",1,Peritoneum/abdomen
+Pleura,408,Pleura
+Pleural Fluid,147,Pleura
+Pleural Fliud,4,Pleura
+Left Parietal Pleura,2,Pleura
+Pleua,1,Pleura
+Right Lung Pleura,1,Pleura
+Prostate,3210,Prostate
+Soft Tissue,263,Soft tissue/skin
+Chest Wall,147,Soft tissue/skin
+Skin,141,Soft tissue/skin
+Neck,35,Soft tissue/skin
+Scalp,7,Soft tissue/skin
+Soft Tissue Back,6,Soft tissue/skin
+Back,5,Soft tissue/skin
+Muscle,3,Soft tissue/skin
+Buttock,3,Soft tissue/skin
+Thigh,2,Soft tissue/skin
+Flank,2,Soft tissue/skin
+Arm,2,Soft tissue/skin
+Forehead,1,Soft tissue/skin
+"Soft Tissue, T7",1,Soft tissue/skin
+Chest Wall Soft Tissue,1,Soft tissue/skin
+"Soft Tissue, Posterior Left Shoulder",1,Soft tissue/skin
+Groin,1,Soft tissue/skin
+Leg,1,Soft tissue/skin
+Left Thigh,1,Soft tissue/skin
+Upper Back,1,Soft tissue/skin
+"Rib,Soft Tissue",1,Soft tissue/skin
+Mediastinum,26,Thorax/head-neck other
+Pericardium,21,Thorax/head-neck other
+Heart,4,Thorax/head-neck other
+Orbit - Right,3,Thorax/head-neck other
+Paratracheal Mass,2,Thorax/head-neck other
+Thyroid,2,Thorax/head-neck other
+Orbit,2,Thorax/head-neck other
+Percardium,1,Thorax/head-neck other
+Submandibular Gland,1,Thorax/head-neck other
+Mediastinal Mass,1,Thorax/head-neck other
+Paratracheal,1,Thorax/head-neck other
+Pericardial Fluid,1,Thorax/head-neck other
+Orbital Floor,1,Thorax/head-neck other
+Thymus,1,Thorax/head-neck other
+Larynx,1,Thorax/head-neck other
+Not Applicable,16184,Unknown
+Unknown,41,Unknown
+Not Available,21,Unknown

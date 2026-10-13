@@ -170,6 +170,130 @@ def anchor_met_to_sequencing(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+# --------------------------------------------------------------------------
+# Stage 0 cache (data_cleaning_plan.md Section 0.3 / 4). The three large IMPACT
+# text files are parsed once into data/raw/cache/*.parquet; every later read
+# goes through the parquet. Wide gene x sample matrices are cached long.
+# --------------------------------------------------------------------------
+
+CACHE = RAW / "cache"
+
+# Mutation columns used anywhere in the v3 pipeline.
+MUT_COLS = [
+    "Hugo_Symbol", "Tumor_Sample_Barcode", "Chromosome", "Start_Position",
+    "End_Position", "Reference_Allele", "Tumor_Seq_Allele2", "Consequence",
+    "Variant_Classification", "Variant_Type", "Mutation_Status",
+    "t_ref_count", "t_alt_count", "HGVSp_Short", "Protein_position",
+    "ASCN.CLONAL", "ASCN.CCF_M_COPIES", "ASCN.CCF_M_COPIES_LOWER",
+    "ASCN.CCF_M_COPIES_UPPER", "ASCN.PURITY", "ASCN.TOTAL_COPY_NUMBER",
+    "ASCN.MINOR_COPY_NUMBER", "ASCN.FACETS_QC_PASSED",
+]
+SEG_COLS = ["ID", "chrom", "loc.start", "loc.end", "num.mark", "seg.mean"]
+
+
+def _cached(name: str, build) -> pd.DataFrame:
+    path = CACHE / f"{name}.parquet"
+    if not path.exists():
+        CACHE.mkdir(parents=True, exist_ok=True)
+        print(f"[cache] building {path.name} (one-time parse of raw text)")
+        build().to_parquet(path, index=False)
+    return pd.read_parquet(path)
+
+
+def _build_mutations() -> pd.DataFrame:
+    m = pd.read_csv(IMPACT / "data_mutations.txt", sep="\t", usecols=MUT_COLS,
+                    low_memory=False)
+    for c in ["t_ref_count", "t_alt_count", "Start_Position", "End_Position",
+              "ASCN.CCF_M_COPIES", "ASCN.CCF_M_COPIES_LOWER",
+              "ASCN.CCF_M_COPIES_UPPER", "ASCN.PURITY",
+              "ASCN.TOTAL_COPY_NUMBER", "ASCN.MINOR_COPY_NUMBER"]:
+        m[c] = pd.to_numeric(m[c], errors="coerce")
+    for c in ["Chromosome", "Protein_position", "ASCN.FACETS_QC_PASSED"]:
+        m[c] = m[c].astype("string")
+    return m.rename(columns={"Tumor_Sample_Barcode": "SAMPLE_ID"})
+
+
+def _melt_wide(path: Path, chunk: int = 4000) -> pd.DataFrame:
+    """Gene x sample matrix -> long (SAMPLE_ID, gene, value), NaN dropped."""
+    wide = pd.read_csv(path, sep="\t", index_col=0, dtype=str)
+    wide.index.name = "gene"
+    parts = []
+    for i in range(0, wide.shape[1], chunk):
+        s = wide.iloc[:, i:i + chunk].stack(future_stack=True).dropna()
+        parts.append(s.rename("value").reset_index().rename(
+            columns={"level_1": "SAMPLE_ID"}))
+    out = pd.concat(parts, ignore_index=True)
+    for c in ["SAMPLE_ID", "gene"]:
+        out[c] = out[c].astype("category")
+    return out
+
+
+def _build_cna() -> pd.DataFrame:
+    # Discrete GISTIC-style calls; only non-zero calls are kept (zero is the
+    # measured default on a covering panel, see panel masking in Stage 5).
+    long = _melt_wide(IMPACT / "data_cna.txt")
+    long["value"] = pd.to_numeric(long["value"], errors="coerce")
+    return long[long["value"].fillna(0) != 0].reset_index(drop=True)
+
+
+def _build_ascna() -> pd.DataFrame:
+    # Cells are "total;minor" integer copy numbers from FACETS.
+    long = _melt_wide(IMPACT / "data_CNA.ascna.txt")
+    tm = long.pop("value").str.split(";", n=1, expand=True)
+    long["tcn"] = pd.to_numeric(tm[0], errors="coerce").astype("Int16")
+    long["mcn"] = pd.to_numeric(tm[1], errors="coerce").astype("Int16")
+    return long
+
+
+def _build_seg() -> pd.DataFrame:
+    return pd.read_csv(IMPACT / "data_cna_hg19.seg", sep="\t", usecols=SEG_COLS,
+                       dtype={"chrom": str})
+
+
+@functools.lru_cache(maxsize=None)
+def load_mutations() -> pd.DataFrame:
+    """IMPACT MAF (somatic), cached. Sample column renamed to SAMPLE_ID."""
+    return _cached("mutations", _build_mutations)
+
+
+@functools.lru_cache(maxsize=None)
+def load_cna() -> pd.DataFrame:
+    """IMPACT discrete CNA, long, non-zero calls only (value in {-2,-1.5,-1,1,2})."""
+    return _cached("cna_long", _build_cna)
+
+
+@functools.lru_cache(maxsize=None)
+def load_ascna() -> pd.DataFrame:
+    """IMPACT allele-specific CN, long: SAMPLE_ID, gene, tcn, mcn."""
+    return _cached("ascna_long", _build_ascna)
+
+
+@functools.lru_cache(maxsize=None)
+def load_seg() -> pd.DataFrame:
+    """IMPACT hg19 segmentation (log2 ratio seg.mean)."""
+    return _cached("seg", _build_seg)
+
+
+@functools.lru_cache(maxsize=None)
+def load_sv() -> pd.DataFrame:
+    """IMPACT structural variants (small; read directly)."""
+    sv = pd.read_csv(IMPACT / "data_sv.txt", sep="\t", low_memory=False)
+    return sv.rename(columns={"Sample_Id": "SAMPLE_ID"})
+
+
+@functools.lru_cache(maxsize=None)
+def load_gene_panel_matrix() -> pd.DataFrame:
+    """Per-sample panel for mutations / gistic (CNA) / structural_variants."""
+    return pd.read_csv(IMPACT / "data_gene_panel_matrix.txt", sep="\t")
+
+
+@functools.lru_cache(maxsize=None)
+def cna_profiled_samples() -> frozenset[str]:
+    """Samples that are columns of data_cna.txt (i.e. have CNA data)."""
+    with open(IMPACT / "data_cna.txt") as fh:
+        return frozenset(fh.readline().rstrip("\n").split("\t")[1:])
+
+
 def normalize_site(s: pd.Series) -> pd.Series:
     """Collapse the free-text site fields (IMPACT has 364 distinct values,
     including both 'Lymph Node' and 'Lymph node') to title-cased, trimmed

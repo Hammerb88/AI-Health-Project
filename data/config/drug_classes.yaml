@@ -1,0 +1,397 @@
+# Drug-class definitions (data_cleaning_plan.md Section 6.1).
+#
+# agent_classes: every MSK-CHORD AGENT maps to exactly one class. exposure.py
+#   raises on any agent not listed here, so new data cannot be silently
+#   mis-classified (checklist item 1). `non_systemic` agents (bone agents,
+#   topicals, ophthalmics, liver-directed Y-90, intravesical BCG) are ignored
+#   for prior / intervening lines. `other_<subtype>` lists hold the remaining
+#   agents grouped by their MSK-CHORD SUBTYPE.
+# cohorts: anchor_classes define time zero. companions are agents given with
+#   the anchor; they count as an intervening line only when started outside
+#   every class episode. later_line_flags are
+#   recorded as exposure before collection (prostate AR inhibitors, etc.).
+#   subclass entries are "class" or "class:AGENT"; the first subclass whose
+#   agents start within 30 days of class_start wins, in the order listed.
+cohorts:
+  breast:
+    label: Breast / endocrine
+    cancer_type: Breast Cancer
+    icd_o_sites:
+    - C50
+    anchor_classes:
+    - aromatase_inhibitor
+    - serm
+    - serd
+    subclass:
+      AI:
+      - aromatase_inhibitor
+      tamoxifen:
+      - serm
+      fulvestrant:
+      - serd
+    companions:
+      companion_cdk46:
+        classes:
+        - cdk46_inhibitor
+        agents: []
+      ovarian_suppression:
+        classes: []
+        agents:
+        - LEUPROLIDE
+        - GOSERELIN
+        - TRIPTORELIN
+    later_line_flags:
+      cdk46_any:
+        classes:
+        - cdk46_inhibitor
+        agents: []
+      pi3k_mtor:
+        classes:
+        - pi3k_mtor
+        agents: []
+  nsclc:
+    label: NSCLC / EGFR-TKI
+    cancer_type: Non-Small Cell Lung Cancer
+    icd_o_sites:
+    - C34
+    anchor_classes:
+    - egfr_tki_1g2g
+    - egfr_tki_3g
+    subclass:
+      osimertinib:
+      - egfr_tki_3g
+      1st/2nd-gen TKI:
+      - egfr_tki_1g2g
+    companions: {}
+    later_line_flags: {}
+  prostate:
+    label: Prostate / ADT
+    cancer_type: Prostate Cancer
+    icd_o_sites:
+    - C61
+    anchor_classes:
+    - gnrh
+    - antiandrogen_1g
+    subclass:
+      GnRH:
+      - gnrh
+      antiandrogen:
+      - antiandrogen_1g
+    companions: {}
+    later_line_flags:
+      ar_inhibitor_exposure:
+        classes:
+        - ar_inhibitor
+        agents: []
+  crc:
+    label: CRC / FOLFOX-CAPOX
+    cancer_type: Colorectal Cancer
+    icd_o_sites:
+    - C18
+    - C19
+    - C20
+    anchor_classes:
+    - oxaliplatin
+    subclass:
+      FOLFOX:
+      - fluoropyrimidine:FLUOROURACIL
+      CAPOX:
+      - fluoropyrimidine:CAPECITABINE
+    companions:
+      fluoropyrimidine_backbone:
+        classes: []
+        agents:
+        - FLUOROURACIL
+        - CAPECITABINE
+        - LEUCOVORIN
+    later_line_flags:
+      irinotecan:
+        classes:
+        - irinotecan
+        agents: []
+      anti_egfr_mab:
+        classes:
+        - anti_egfr_mab
+        agents: []
+      anti_vegf:
+        classes:
+        - anti_vegf
+        agents: []
+agent_classes:
+  aromatase_inhibitor:
+  - LETROZOLE
+  - ANASTROZOLE
+  - EXEMESTANE
+  - LETROZOLE-RIBOCICLIB
+  serm:
+  - TAMOXIFEN
+  - TOREMIFENE
+  serd:
+  - FULVESTRANT
+  - ELACESTRANT
+  cdk46_inhibitor:
+  - PALBOCICLIB
+  - ABEMACICLIB
+  - RIBOCICLIB
+  gnrh:
+  - LEUPROLIDE
+  - GOSERELIN
+  - DEGARELIX
+  - RELUGOLIX
+  - TRIPTORELIN
+  - HISTRELIN
+  - ABARELIX
+  antiandrogen_1g:
+  - BICALUTAMIDE
+  - NILUTAMIDE
+  - FLUTAMIDE
+  ar_inhibitor:
+  - ABIRATERONE
+  - ENZALUTAMIDE
+  - APALUTAMIDE
+  - DAROLUTAMIDE
+  egfr_tki_1g2g:
+  - ERLOTINIB
+  - GEFITINIB
+  - AFATINIB
+  - DACOMITINIB
+  egfr_tki_3g:
+  - OSIMERTINIB
+  oxaliplatin:
+  - OXALIPLATIN
+  fluoropyrimidine:
+  - FLUOROURACIL
+  - CAPECITABINE
+  - LEUCOVORIN
+  - FLOXURIDINE
+  - TIPIRACIL-TRIFLURIDINE
+  other_endocrine:
+  - RALOXIFENE
+  - MEGESTROL
+  - ESTRAMUSTINE
+  - DIETHYLSTILBESTROL
+  egfr_other:
+  - MOBOCERTINIB
+  - ROCILETINIB
+  - AMIVANTAMAB
+  platinum:
+  - CARBOPLATIN
+  - CISPLATIN
+  taxane:
+  - PACLITAXEL
+  - PACLITAXEL PROTEIN-BOUND
+  - DOCETAXEL
+  - CABAZITAXEL
+  anthracycline:
+  - DOXORUBICIN
+  - DOXORUBICIN LIPOSOMAL
+  - EPIRUBICIN
+  irinotecan:
+  - IRINOTECAN
+  - IRINOTECAN LIPOSOMAL
+  anti_her2:
+  - TRASTUZUMAB
+  - PERTUZUMAB
+  - ADO-TRASTUZUMAB EMTANSINE
+  - FAM-TRASTUZUMAB DERUXTECAN
+  - HYALURONIDASE-TRASTUZUMAB
+  - HYALURONIDASE/PERTUZUMAB/TRASTUZUMAB
+  - LAPATINIB
+  - TUCATINIB
+  - NERATINIB
+  anti_egfr_mab:
+  - CETUXIMAB
+  - PANITUMUMAB
+  - NECITUMUMAB
+  anti_vegf:
+  - BEVACIZUMAB
+  - RAMUCIRUMAB
+  - REGORAFENIB
+  immune_checkpoint:
+  - PEMBROLIZUMAB
+  - NIVOLUMAB
+  - ATEZOLIZUMAB
+  - DURVALUMAB
+  - IPILIMUMAB
+  - CEMIPLIMAB
+  - AVELUMAB
+  - TREMELIMUMAB
+  parp_inhibitor:
+  - OLAPARIB
+  - RUCAPARIB
+  - NIRAPARIB
+  - TALAZOPARIB
+  - ABT-888 (VELIPARIB)
+  pi3k_mtor:
+  - ALPELISIB
+  - EVEROLIMUS
+  alk_ros_met_ret:
+  - CRIZOTINIB
+  - ALECTINIB
+  - LORLATINIB
+  - BRIGATINIB
+  - CERITINIB
+  - ENTRECTINIB
+  - CAPMATINIB
+  - TEPOTINIB
+  - SELPERCATINIB
+  - PRALSETINIB
+  - LAROTRECTINIB
+  braf_mek_kras:
+  - DABRAFENIB
+  - TRAMETINIB
+  - ENCORAFENIB
+  - BINIMETINIB
+  - VEMURAFENIB
+  - COBIMETINIB
+  - SOTORASIB
+  - ADAGRASIB
+  - SELUMETINIB
+  antibody_drug_conjugate:
+  - SACITUZUMAB GOVITECAN
+  - ENFORTUMAB VEDOTIN
+  investigational:
+  - INVESTIGATIONAL
+  non_systemic:
+  - ZOLEDRONIC ACID
+  - PAMIDRONATE
+  - FLUOROURACIL TOPICAL
+  - BEXAROTENE TOPICAL
+  - SIROLIMUS TOPICAL
+  - MITOMYCIN OPHTHALMIC
+  - AFLIBERCEPT OPHTHALMIC
+  - YTTRIUM Y-90 THERASPHERES
+  - YTTRIUM Y-90 MICROSPHERES
+  - BCG
+  other_chemo:
+  - AC225 H11B6 MED 20-321
+  - ARSENIC TRIOXIDE
+  - ASPARAGINASE ESCHERICHIA COLI
+  - AZACITIDINE
+  - BENDAMUSTINE
+  - BLEOMYCIN
+  - BUSULFAN
+  - CARMUSTINE
+  - CHLORAMBUCIL
+  - CLADRIBINE
+  - CLOFARABINE
+  - CU64 NOTA-PSMAI-PEG-CY55-C' DOTS
+  - CYCLOPHOSPHAMIDE
+  - CYTARABINE
+  - CYTARABINE LIPOSOMAL
+  - CYTARABINE LIPOSOMAL-DAUNORUBICIN LIPOSOMAL
+  - DACARBAZINE
+  - DACTINOMYCIN
+  - DAUNORUBICIN
+  - DECITABINE
+  - ERIBULIN
+  - ETOPOSIDE
+  - ETOPOSIDE PHOSPHATE
+  - FLUDARABINE
+  - GEMCITABINE
+  - HYDROXYUREA
+  - IDARUBICIN
+  - IFOSFAMIDE
+  - IXABEPILONE
+  - LENALIDOMIDE
+  - LOMUSTINE
+  - LURBINECTEDIN
+  - LUTETIUM LU-177 5B1-MVT1075
+  - LUTETIUM LU-177 DOTA-JR11
+  - LUTETIUM LU-177 DOTAEBTATE
+  - LUTETIUM LU-177 DOTATATE
+  - MECHLORETHAMINE
+  - MELPHALAN
+  - MERCAPTOPURINE
+  - METHOTREXATE
+  - MITOMYCIN
+  - MITOTANE
+  - MITOXANTRONE
+  - NINTEDANIB
+  - PEGASPARGASE
+  - PEMETREXED
+  - PENTOSTATIN
+  - POMALIDOMIDE
+  - PROCARBAZINE
+  - RADIUM RA-223 CHLORIDE
+  - RADIUM RA-223 DICHLORIDE
+  - ROMIDEPSIN
+  - SAMARIUM SM-153 LEXIDRONAM
+  - SODIUM IODIDE I-131
+  - SODIUM IODIDE I-131 3F8
+  - SODIUM IODIDE I-131 BC8 ANTICD45
+  - SODIUM IODIDE I-131 MIBG
+  - SODIUM IODIDE I-131 MIP-1095
+  - SODIUM IODIDE I-131 OMBURTAMAB 8H9
+  - TEMOZOLOMIDE
+  - THALIDOMIDE
+  - THIOGUANINE
+  - THIOTEPA
+  - TOPOTECAN
+  - TRABECTEDIN
+  - TRETINOIN
+  - VINBLASTINE
+  - VINCRISTINE
+  - VINORELBINE
+  - YTTRIUM Y-90 CLIVATUZUMAB
+  other_targeted:
+  - ACALABRUTINIB
+  - ASCIMINIB
+  - AXITINIB
+  - BOSUTINIB
+  - CABOZANTINIB
+  - CARFILZOMIB
+  - CEDAZURIDINE-DECITABINE
+  - DASATINIB
+  - DUVELISIB
+  - ENASIDENIB
+  - ERDAFITINIB
+  - GILTERITINIB
+  - IBRUTINIB
+  - IDELALISIB
+  - IMATINIB
+  - ISOTRETINOIN
+  - IVOSIDENIB
+  - IXAZOMIB
+  - LENVATINIB
+  - MIDOSTAURIN
+  - NILOTINIB
+  - PACRITINIB
+  - PAZOPANIB
+  - PEMIGATINIB
+  - PONATINIB
+  - RIPRETINIB
+  - RUXOLITINIB
+  - SELINEXOR
+  - SORAFENIB
+  - SUNITINIB
+  - TAZEMETOSTAT
+  - UMBRALISIB
+  - VENETOCLAX
+  - VISMODEGIB
+  - VORINOSTAT
+  - ZANUBRUTINIB
+  other_biologic:
+  - ALDESLEUKIN
+  - ALEMTUZUMAB
+  - BELANTAMAB MAFODOTIN
+  - BLINATUMOMAB
+  - BORTEZOMIB
+  - BRENTUXIMAB VEDOTIN
+  - DARATUMUMAB
+  - DARATUMUMAB-HYALURONIDASE
+  - ECULIZUMAB
+  - ELOTUZUMAB
+  - EPCORITAMAB
+  - GEMTUZUMAB OZOGAMICIN
+  - HYALURONIDASE-RITUXIMAB
+  - IDECABTAGENE VICLEUCEL
+  - INTERFERON ALFA-2B
+  - OBINUTUZUMAB
+  - OFATUMUMAB
+  - POLATUZUMAB VEDOTIN
+  - RITUXIMAB
+  - SIPULEUCEL-T
+  - TALIMOGENE LAHERPAREPVEC
+  - TECLISTAMAB
+  - YTTRIUM Y-90 IBRITUMOMAB TIUXETAN

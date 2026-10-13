@@ -1,0 +1,5 @@
+cohort,post n,t_days median [IQR],cum_days_on_class median [IQR],% on class at collection,% with intervening lines,most common intervening classes,% adjuvant start (all)
+Breast / endocrine,228,1134 [516-1928],412 [82-918],58%,41%,"fluoropyrimidine (45), other_chemo (34), pi3k_mtor (33)",60%
+NSCLC / EGFR-TKI,109,511 [272-804],266 [122-495],76%,24%,"other_chemo (14), investigational (10), platinum (10)",10%
+Prostate / ADT,292,1358 [696-2466],719 [234-1517],77%,59%,"ar_inhibitor (143), taxane (49), investigational (42)",30%
+CRC / FOLFOX-CAPOX,373,447 [214-916],100 [85-126],7%,35%,"fluoropyrimidine (89), irinotecan (71), anti_vegf (36)",38%

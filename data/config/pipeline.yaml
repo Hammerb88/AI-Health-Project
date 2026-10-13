@@ -1,0 +1,40 @@
+# Pipeline parameters (data_cleaning_plan.md v3). Decisions D1-D9 are fixed;
+# change values here, not in code.
+
+oncogenicity_source: rules      # oncokb | rules  (D4; oncokb only if data/raw/oncokb/ is populated)
+
+windows:
+  dx_buffer_days: 30            # class rows before primary dx - 30 d are another cancer's (6.2)
+  episode_gap_days: 60          # merge class intervals with gaps <= 60 d (6.2)
+  on_class_grace_days: 30       # on_class_at_collection grace after episode end (6.3)
+  line_window_days: 30          # prior < class_start - 30; intervening > class_start + 30 (6.3)
+  early_window_days: 90         # label A excludes 0 < t <= 90 (D2)
+  archived_tissue_days: 365     # collection > 365 d before SEQ_DATE (7)
+
+filters:
+  min_altered_n: 10             # 9.6
+  min_altered_frac: 0.02        # 9.6
+  hypermutated_tmb: 20          # mut/Mb (D8)
+  low_purity: 0.2
+  fga_abs_seg_mean: 0.2         # 10
+  signature_min_mutations: 10   # 9.7
+  site_min_samples: 30          # biopsy_organ groups < 30 -> Other (11)
+
+# First distant metastasis on the MSK-CHORD axis (6.3). MSK-CHORD has no
+# curated metastasis timeline, so it is the earliest of:
+#   (a) the primary diagnosis date when STAGE_CDM_DERIVED == "Stage 4";
+#   (b) the first NLP radiology mention (data_timeline_tumor_sites.txt) of a
+#       distant organ below. Lymph nodes / "Other" are never distant; the
+#       primary organ (and organs ambiguous with it) are left out per cohort;
+#   (c) collection of a MSK-CHORD sample with SAMPLE_TYPE == "Metastasis"
+#       whose biopsy organ is not a lymph node.
+distant_sites:
+  breast:   [Lung, Bone, Liver, CNS/Brain, Pleura, Adrenal Glands, Intra-Abdominal]
+  nsclc:    [Bone, Liver, CNS/Brain, Adrenal Glands, Intra-Abdominal, Pleura]
+  prostate: [Lung, Bone, Liver, CNS/Brain, Pleura, Adrenal Glands, Intra-Abdominal]
+  crc:      [Lung, Bone, Liver, CNS/Brain, Pleura, Adrenal Glands]
+
+cv:
+  n_folds: 5
+  n_repeats: 20
+  seed: 20261012

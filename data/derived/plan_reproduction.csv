@@ -1,0 +1,5 @@
+cohort,samples,t_le_0,t_0_90,t_gt_90,t_gt_90_on_class,strict_t_le_0,strict_t_gt_90,strict_t_gt_90_no_between,median_t_gt_90
+breast,3988,2655,287,1046,615,847,245,145,1159.0
+nsclc,1313,975,72,266,200,346,117,87,556.5
+prostate,2696,1853,242,601,450,727,299,125,1012.0
+crc,3501,2819,84,598,57,1604,387,249,350.5

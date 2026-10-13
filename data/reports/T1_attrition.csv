@@ -1,0 +1,15 @@
+step,description,Breast / endocrine,NSCLC / EGFR-TKI,Prostate / ADT,CRC / FOLFOX-CAPOX
+0,MSK-CHORD samples with a collection date,25040,25040,25040,25040
+1,sample cancer type matches cohort,5368,7809,3211,5543
+2,patient received the class after primary diagnosis,3988,1313,2696,3501
+3,sample in MSK-IMPACT 50K with mutation + CNA data,3402,1029,2078,2780
+4,breast: HR-positive (HR == 'Yes'),3257,<NA>,<NA>,<NA>
+4,"nsclc: EGFR-sensitizing alteration (ex19del, L858R, G719X, L861Q, S768I, E709X)",<NA>,895,<NA>,<NA>
+4,no cohort-specific rule,<NA>,<NA>,2078,2780
+4L,labelled (all t),3257 (818 post),895 (192 post),2078 (501 post),2780 (497 post)
+5,exclude 0 < t_days <= 90 (and unlabelled),3029 (818 post),849 (192 post),1899 (501 post),2710 (497 post)
+5b,exclude label-0 samples with prior medications to MSK,2607 (818 post),753 (192 post),1515 (501 post),2418 (497 post)
+5c,one sample per patient,2607 (818 post),753 (192 post),1515 (501 post),2418 (497 post)
+6,"strict tier: class first-line, no prior meds to MSK, FACETS QC pass",1040 (234 post),432 (109 post),1026 (299 post),1991 (387 post)
+6b,"strict, no intervening therapy",944 (138 post),406 (83 post),852 (125 post),1853 (249 post)
+7,relaxed tier with FACETS QC pass (clonality available),2360 (770 post),670 (176 post),1190 (408 post),2211 (450 post)

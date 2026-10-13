@@ -32,7 +32,6 @@ Events on the same day are ordered Dx, Met, Tx, Sample.
 | 18 smaller groups | 386 | 3.2 | 30 | 1 | 1 | 0 |
 | **Total** | **12,095** | **100** | **1,047 (8.7%)** | **26** | **16** | **13** |
 
- 
-- Tracking which subclones survive treatment across two samples is not supported: 13 dated pairs, at most 689 unverified ones.
-- Predicting response from a pre-treatment sample is well supported. 62% of patients (about 7,500) had their sample collected before systemic therapy started, so their genome is a clean pre-treatment picture. You can predict how they fare on the following therapy, for example time to progression, using MSK-CHORD's text-mined progression timeline (the radiology-report outcome from Q10).
-- Predicting where the cancer will spread is better than I estimated. 16% of patients develop their first distant metastasis after the sample, and many more develop new organ sites later. 47% are diagnosed with metastasis within 30 days of the sample, which suggests the biopsy is often the procedure that diagnosed the metastasis.
+
+## Preprocessing run order, from data/: 
+exposure.py → build_cohort.py → build_alterations.py → preprocess.py → report.py. The first run builds the parquet cache (about 2 minutes); a full run takes about 10 minutes.
