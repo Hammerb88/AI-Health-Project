@@ -177,8 +177,8 @@ class FoldPreprocessor(BaseEstimator, TransformerMixin):
     imputation: main-analysis features have no NA). Continuous covariates are
     median-imputed and standardized; categoricals one-hot encoded (levels
     unseen in training are dropped); binaries mode-imputed. Written in pandas
-    because sklearn.compose / sklearn.impute are blocked by an Application
-    Control policy on the development machine.
+    (originally because sklearn.compose / sklearn.impute were blocked on the
+    development machine; they import now, but this version is tested).
     """
 
     def __init__(self, alteration_cols: list[str], covariate_types: dict[str, str],
@@ -253,13 +253,18 @@ def build() -> None:
     s["s3_survivorship_keep"] = (s.label_A == 1) | (s.followup_days >= s.cohort.map(med_post))
 
     # ---- feature blocks ------------------------------------------------------
-    base_alt = [c for c in alt.columns if re.search(r"_(mut|amp|del|sv|loh)$", c) and not afeat.loc[c, "variant_level"]]
+    # Variant-level targets that are plain gene x type CNA/SV calls (ERBB2_amp, MET_amp,
+    # AR_amp, AR_sv) are also ordinary alteration features in every cohort (modeling
+    # plan Step 0): ERBB2/MET/AR are amp-dominant, so both definitions coincide.
+    GENE_TYPE_TARGETS = {"ERBB2_amp", "MET_amp", "AR_amp", "AR_sv"}
+    base_alt = [c for c in alt.columns if re.search(r"_(mut|amp|del|sv|loh)$", c)
+                and (not afeat.loc[c, "variant_level"] or c in GENE_TYPE_TARGETS)]
     clon = [c for c in alt.columns if re.search(r"_mut_(clonal|subclonal|clonality_unknown)$", c)]
     ccf = [c for c in alt.columns if c.endswith("_mut_max_ccf")]
     variant_cols = [c for c in alt.columns if afeat.loc[c, "variant_level"]]
 
     # ---- checklist 11 / 13 ---------------------------------------------------
-    alt_block = base_alt + clon + ccf + variant_cols
+    alt_block = list(dict.fromkeys(base_alt + clon + ccf + variant_cols))
     bad = [c for c in alt_block if re.search(r"(?i)signature|level_|oncokb|treatment|n_mutations|highest_", c)]
     C.check(not bad, "11. no signature / OncoKB evidence / treatment field / n_mutations_oncogenic in the alteration block")
 
@@ -317,7 +322,7 @@ def build() -> None:
         A = alt.reindex(d.SAMPLE_ID).reset_index(drop=True)
         own_tv = [c for c in variant_cols if cohort == "pooled" or c in tv.get(cohort, {})]
         alt_cols = [c for c in base_alt + clon + ccf if (A[c] == 1).any() or (c in ccf and A[c].notna().any())]
-        feat_cols = alt_cols + own_tv
+        feat_cols = list(dict.fromkeys(alt_cols + own_tv))
         main_cols = [c for c in feat_cols if afeat.loc[c, "gene"] in pg_341 and c not in ccf]
         # LOH is NA where FACETS gave no allele-specific call for the gene (often
         # X-linked genes in males), not because of the panel. Such LOH features

@@ -1,13 +1,13 @@
 # preprocess
 
-_Written 2026-10-13 00:20_
+_Written 2026-11-06 14:57_
 
 Stages 7-9 (preprocess.py). 7,293 samples in; model tables written per cohort and pooled
-(breast: 2,607 x 1,617, nsclc: 753 x 1,002, prostate: 1,515 x 1,420, crc: 2,418 x 1,738, pooled: 7,293 x 2,150). Main analysis = strict tier
+(breast: 2,607 x 1,621, nsclc: 753 x 1,003, prostate: 1,515 x 1,422, crc: 2,418 x 1,741, pooled: 7,293 x 2,150). Main analysis = strict tier
 minus hypermutated samples. Folds: StratifiedGroupKFold 5 x 20 repeats, grouped by
 patient, stratified by label x subclass (label x cohort for pooled), for every tier plus A-on.
 Firth gene lists (full-cohort prevalence >= 10 and >= 2%, main analysis,
-variant-level targets always kept): {'breast': 286, 'nsclc': 268, 'prostate': 262, 'crc': 279, 'pooled': 302}. Exposure variables defined only after class start
+variant-level targets always kept): {'breast': 287, 'nsclc': 268, 'prostate': 262, 'crc': 280, 'pooled': 302}. Exposure variables defined only after class start
 (on_class_at_collection, days_since_class_stop, n_lines_between, *_before_collection) are Target-B-only
 covariates: they are zero for >= 99.8% of label-0 samples by construction (table below).
 

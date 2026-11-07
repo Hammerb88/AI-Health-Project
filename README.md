@@ -35,3 +35,6 @@ Events on the same day are ordered Dx, Met, Tx, Sample.
 
 ## Preprocessing run order, from data/: 
 exposure.py → build_cohort.py → build_alterations.py → preprocess.py → report.py. The first run builds the parquet cache (about 2 minutes); a full run takes about 10 minutes.
+
+## Modeling analysis
+To train the models and make the report figures, follow [data/RUN_ANALYSIS.md](data/RUN_ANALYSIS.md).
