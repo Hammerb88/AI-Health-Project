@@ -262,7 +262,27 @@ class PenalizedLR:
         def fg(th):
             b0, wf, u, v = th[0], th[1:1 + F], th[1 + F:1 + F + P], th[1 + F + P:]
             wp = u - v
-            z = b0 + Xf @ wf + Xp @ wp
+            for name, arr in [("Xf", Xf), ("Xp", Xp), ("wf", wf), ("wp", wp)]:
+                if not np.all(np.isfinite(arr)):
+                    raise FloatingPointError(f"{name} contains NaN or Inf")
+
+            if not np.isfinite(b0):
+                raise FloatingPointError("b0 contains NaN or Inf")
+            if not np.all(np.isfinite(Xf)):
+                raise ValueError("Xf contains NaN or Inf")
+            if not np.all(np.isfinite(Xp)):
+                raise ValueError("Xp contains NaN or Inf")
+            if not np.all(np.isfinite(wf)):
+                raise ValueError("wf contains NaN or Inf")
+            if not np.all(np.isfinite(wp)):
+                raise ValueError("wp contains NaN or Inf")
+            if not np.isfinite(b0):
+                raise ValueError("b0 is not finite")
+            with np.errstate(over="raise", invalid="raise"):
+                z = b0 + Xf @ wf + Xp @ wp
+
+            if not np.all(np.isfinite(z)):
+                raise FloatingPointError("Linear predictor z contains NaN or Inf")
             f = Cc * np.sum(np.logaddexp(0, z) - y * z) + 0.5 * (1 - a) * wp @ wp + a * (u.sum() + v.sum())                 + 0.5 * lu * wf @ wf
             r = Cc * (expit(z) - y)
             gp = Xp.T @ r + (1 - a) * wp
@@ -273,6 +293,16 @@ class PenalizedLR:
         bounds = [(None, None)] * (1 + F) + [(0, None)] * (2 * P)
         res = minimize(fg, x0, jac=True, method="L-BFGS-B", bounds=bounds,
                        options={"maxiter": self.max_iter, "maxfun": 4 * self.max_iter, "gtol": 1e-7, "ftol": 1e-12})
+        if not res.success:
+            raise RuntimeError(
+                f"PenalizedLR optimization failed: "
+                f"status={res.status}, message={res.message}"
+            )
+
+        if not np.all(np.isfinite(res.x)):
+            raise FloatingPointError(
+                "PenalizedLR optimization returned non-finite coefficients"
+            )
         th = res.x
         coef = np.zeros(p)
         coef[un] = th[1:1 + F]
