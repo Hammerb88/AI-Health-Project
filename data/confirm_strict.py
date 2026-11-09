@@ -91,30 +91,85 @@ def bh(p: pd.Series) -> pd.Series:
     return q
 
 
+
 def fit_one(cohort, f, x, y, ps):
-    r = {"cohort": cohort, "feature": f, "n_altered": int(x.sum()), "n_altered_pre": int(x[y == 0].sum()),
-         "n_altered_post": int(x[y == 1].sum()), "pct_pre": 100 * x[y == 0].mean(), "pct_post": 100 * x[y == 1].mean()}
+    r = {
+        "cohort": cohort,
+        "feature": f,
+        "n_altered": int(x.sum()),
+        "n_altered_pre": int(x[y == 0].sum()),
+        "n_altered_post": int(x[y == 1].sum()),
+        "pct_pre": 100 * x[y == 0].mean(),
+        "pct_post": 100 * x[y == 1].mean()
+    }
+
     one = np.ones(len(y))
-    for tag, X in (("crude", np.column_stack([one, x])), ("adj", np.column_stack([one, x, ps]))):
+
+    for tag, X in (
+        ("crude", np.column_stack([one, x])),
+        ("adj", np.column_stack([one, x, ps]))
+    ):
+        if not np.all(np.isfinite(X)):
+            raise ValueError(
+                f"[{cohort}/{f}/{tag}] Non-finite design matrix"
+            )
+
+        matrix_rank = np.linalg.matrix_rank(X)
+
+        if matrix_rank < X.shape[1]:
+            raise ValueError(
+                f"[{cohort}/{f}/{tag}] Singular design matrix: "
+                f"rank={matrix_rank}, columns={X.shape[1]}, "
+                f"feature_unique={np.unique(x)}, "
+                f"prog_score_unique={np.unique(ps).size}"
+            )
+
         fr = firth_logit(X, y, profile=(1,))
+
         r[f"log_or_{tag}"] = fr["coef"]["x1"]
-        r[f"ci_low_{tag}"], r[f"ci_high_{tag}"] = fr["ci_low"]["x1"], fr["ci_high"]["x1"]
-        r[f"p_{tag}"], r[f"ci_type_{tag}"] = fr["p"]["x1"], fr["ci_type"]["x1"]
+        r[f"ci_low_{tag}"] = fr["ci_low"]["x1"]
+        r[f"ci_high_{tag}"] = fr["ci_high"]["x1"]
+        r[f"p_{tag}"] = fr["p"]["x1"]
+        r[f"ci_type_{tag}"] = fr["ci_type"]["x1"]
+
     return r
 
 
+
+
 def full_cov_matrix(cohort: str, d: pd.DataFrame) -> np.ndarray:
-    """All block-C covariates, one-hot with the first level dropped, numerics standardized."""
+    """All identifiable block-C covariates, with redundant columns removed."""
     types = M.blocks(cohort)["C"]
     pre = PP.make_preprocessor([], types).fit(d)
     X = pre.transform(d)
+
     drop = []
     for c in pre.cat_:
         lv = [k for k in X.columns if k.startswith(f"cat__{c}_")]
-        drop.append(lv[0])
+        if lv:
+            drop.append(lv[0])
+
     X = X.drop(columns=drop)
     X = X.loc[:, X.std() > 0]
-    return X.to_numpy(float)
+
+    A = np.ones((len(X), 1))
+    kept = []
+    removed = []
+
+    for col in X.columns:
+        candidate = np.column_stack([A, X[col].to_numpy(float)])
+
+        if np.linalg.matrix_rank(candidate) > np.linalg.matrix_rank(A):
+            A = candidate
+            kept.append(col)
+        else:
+            removed.append(col)
+
+    if removed:
+        print(f"[{cohort}] Dropped redundant covariates: {removed}")
+
+    return X[kept].to_numpy(float)
+
 
 
 def main() -> None:
@@ -131,7 +186,10 @@ def main() -> None:
         ps = d[["cohort", "SAMPLE_ID"]].merge(ps_all, on=["cohort", "SAMPLE_ID"], how="left").prog_score.to_numpy()
         assert np.isfinite(ps).all(), f"[{cohort}] every strict row has a prog_score"
         y = d.label_A.to_numpy().astype(float)
-        feats = [f for f in feature_list(cohort, rank) if d[f].sum() > 0]
+        feats = [
+                f for f in feature_list(cohort, rank)
+                if d[f].nunique(dropna=False) > 1
+            ]
         res = Parallel(n_jobs=8)(delayed(fit_one)(cohort, f, d[f].to_numpy(float), y, ps) for f in feats)
         r = pd.DataFrame(res)
         r["q_adj"], r["q_crude"] = bh(r.p_adj), bh(r.p_crude)
@@ -139,8 +197,28 @@ def main() -> None:
         Xc = full_cov_matrix(cohort, d)
         top = r.nsmallest(20, "q_adj").feature
         for f in top:
-            X = np.column_stack([np.ones(len(y)), d[f].to_numpy(float), Xc])
+            X = np.column_stack([
+                np.ones(len(y)),
+                d[f].to_numpy(float),
+                Xc
+            ])
+
+            if not np.all(np.isfinite(X)):
+                raise ValueError(
+                    f"[{cohort}/{f}/full] Non-finite design matrix"
+                )
+
+            matrix_rank = np.linalg.matrix_rank(X)
+
+            if matrix_rank < X.shape[1]:
+                raise ValueError(
+                    f"[{cohort}/{f}/full] Singular design matrix: "
+                    f"rank={matrix_rank}, columns={X.shape[1]}"
+                )
+
             fr = firth_logit(X, y, profile=())
+
+            i = r.index[r.feature == f][0]
             i = r.index[r.feature == f][0]
             r.loc[i, "log_or_full"] = fr["coef"]["x1"]
             r.loc[i, "ci_low_full"], r.loc[i, "ci_high_full"] = fr["ci_low"]["x1"], fr["ci_high"]["x1"]
