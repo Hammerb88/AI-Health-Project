@@ -1,0 +1,13 @@
+cohort,model,variant,feature,expect,rank_alt,mean_shap_altered,passed,gated
+breast,lr,main,ESR1_LBD,"top 10, toward post",2.0,0.7159412061435081,True,True
+breast,lr,met_only,ESR1_LBD,"top 10, toward post",3.0,0.23998610036059262,True,True
+nsclc,lr,main,EGFR_T790M,"top 10, toward post",1.0,2.558101890133755,True,True
+nsclc,lr,main,MET_amp,"top 10, toward post",2.0,1.6811343753137502,True,True
+nsclc,lr,met_only,EGFR_T790M,"top 10, toward post",1.0,2.317414405460298,True,True
+nsclc,lr,met_only,MET_amp,"top 10, toward post",2.0,0.5798086830025461,True,True
+prostate,lr,main,AR_amp,"top 10, toward post",1.0,1.812976203129177,True,True
+prostate,lr,main,AR_LBD,"top 10, toward post",4.0,0.72082643443127,True,True
+prostate,lr,met_only,AR_amp,"top 10, toward post",1.0,1.3567726293148,True,True
+prostate,lr,met_only,AR_LBD,"top 10, toward post",4.0,0.7947905559067717,True,True
+crc,lr,main,KRAS_any,"not top 10, |SHAP among altered| < 10% of top-10 max",10.0,0.0033108199044775935,False,True
+crc,lr,met_only,KRAS_any,reported only,3.0,-0.022057781930190146,True,False

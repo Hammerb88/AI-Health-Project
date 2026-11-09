@@ -1,0 +1,11 @@
+cohort,from,candidate,mean_paired_gain,share_folds_positive,moved
+breast,lr,rf,0.0021944763963870437,0.64,False
+breast,lr,xgb,0.004911663024124775,0.8,False
+nsclc,lr,rf,0.00017612138777435947,0.56,False
+nsclc,lr,xgb,0.011126499779145212,0.76,False
+prostate,lr,rf,-3.589002821432707e-05,0.52,False
+prostate,lr,xgb,0.006996634953305092,0.88,False
+crc,lr,rf,-0.014335506481478228,0.08,False
+crc,lr,xgb,0.0010468648973687112,0.56,False
+pooled,lr,rf,0.008244638501405338,1.0,False
+pooled,lr,xgb,0.013138409557081033,1.0,True

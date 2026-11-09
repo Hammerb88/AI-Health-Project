@@ -1,0 +1,8 @@
+cohort,target,selected,rationale
+breast,B,enet,"rf vs enet: -0.022, 16% folds; xgb vs enet: -0.031, 12% folds"
+breast,B_t,rf,"rf vs enet: +0.024, 88% folds; xgb vs rf: -0.015, 20% folds"
+crc,B,enet,"rf vs enet: -0.017, 44% folds; xgb vs enet: -0.050, 20% folds"
+nsclc,B,enet,"rf vs enet: -0.152, 12% folds; xgb vs enet: -0.030, 40% folds"
+nsclc,B_t,enet,"rf vs enet: -0.149, 8% folds; xgb vs enet: -0.092, 16% folds"
+prostate,B,enet,"rf vs enet: -0.003, 44% folds; xgb vs enet: -0.006, 52% folds"
+prostate,B_t,enet,"rf vs enet: -0.042, 20% folds; xgb vs enet: +0.004, 56% folds"
