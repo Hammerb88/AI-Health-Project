@@ -392,7 +392,8 @@ inside a cluster.
   - Among each cohort's alteration features, ESR1_LBD (breast), EGFR_T790M and MET_amp
     (NSCLC), and AR_amp and AR_LBD (prostate) rank in the top 10 by mean |SHAP|, and
     push predictions toward post.
-  - KRAS_any (CRC) is not in the top 10 and its mean signed SHAP is near 0.
+  - KRAS_any (CRC) is not in the top 10 and its mean signed SHAP is near 0. *(Revised after the
+    first run, see I8: the gate is now the near-0 test alone; the rank is reported only.)*
   - The same positive controls hold in the metastasis-only variant. KRAS is **not** gated
     there: within CRC metastases it is 50.3% pre vs 39.2% post, a swing that is within
     sampling noise for 294 / 296 rows but outside the 10-point tolerance used in
@@ -582,6 +583,8 @@ exposure is inseparable from time in the disease course in this design, because 
 | I2 | Firth validation check (c) uses the exact 2×2 identity (Firth = log OR with 0.5 added to every cell) instead of the logistf endometrial dataset | The endometrial data are not available offline; the 2×2 identity is an exact analytic result and tests the same code path. |
 | I3 | XGBoost SHAP and interaction values come from the booster's `pred_contribs` / `pred_interactions`; linear SHAP is computed as coef × (x − training mean) | Both are the same algorithms as `shap.TreeExplainer` (path-dependent) and `shap.LinearExplainer` (interventional), without the per-call overhead. `shap` is used for the random forest. |
 | I4 | Inner tuning refits the in-fold transforms on every inner training split | Keeps hyperparameter choice free of inner-validation leakage. |
-| I5 | Gate rule for KRAS "mean signed SHAP near 0": mean SHAP among KRAS-altered samples below 10% of the largest such value among the top-10 alteration features | The plan did not define "near 0"; this makes it scale-free across model types. |
+| I5 | *(Superseded by I8.)* Gate rule for KRAS "mean signed SHAP near 0": mean SHAP among KRAS-altered samples below 10% of the largest such value among the top-10 alteration features | The plan did not define "near 0"; this makes it scale-free across model types. |
 | I6 | Site-confounded rule (6.5) applies only to features with crude \|log-OR\| ≥ 0.1; full-covariate Firth ORs "move materially" when they differ from the adjusted OR by more than a factor of 1.5 | Both thresholds were unspecified. |
+| I7 | Stability ranks (top-20 frequency, `rank_alt`, and the M10 learning-curve top-20 overlap) count only features with nonzero SHAP in that fold-model; tied features share a rank (`method="min"`); a feature never used gets no `rank_alt` | **Bug fix found after the first run.** The elastic net sets most alteration coefficients to exactly 0 (median nonzero alterations per fold-model: breast 10, NSCLC 5, prostate 11, CRC 0). Ranking zeros with `method="first"` filled the top 20 with unused features in column (alphabetical) order and marked them robust (e.g. 18 of 18 CRC "robust" features were zero in most fold-models). It also split identical twins (`KRAS_any` / `KRAS_mut`) into ranks 9 and 10 by column order. |
+| I8 | KRAS negative-control gate: passes if KRAS_any's mean SHAP among altered samples lies within an odds ratio of 0.9–1.1 (log-odds −0.105 to +0.095); its rank is reported, not gated. Replaces I5 | **Changed after the gate failed on the first run** (KRAS_any rank 10, mean SHAP among altered +0.003 = 7% of the top-10 maximum). In CRC alterations add no AUC (F2 0.843 vs F0 0.843), so ranks below the first few and the I5 "top-10 maximum" are both noise. KRAS_any was zeroed in 81 of 100 fold-models and never negative; its 97.5th-percentile OR among altered was 1.07; raw post share 20.9% (altered) vs 20.3% (not). An absolute log-odds band tests the intended claim (no effect) directly and is valid for LR and XGBoost SHAP; a random forest would need conversion from the probability scale. |
 

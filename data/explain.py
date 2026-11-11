@@ -27,6 +27,8 @@ OUT = M.MODELS_DIR
 TOP = 20
 ROBUST = 0.70
 PHI = 0.70
+ZERO = 1e-10                                # |SHAP| at or below this = feature not used (I7)
+NULL_BAND = (np.log(0.9), np.log(1.1))      # negative-control gate, log-odds scale (I8)
 
 
 def selected() -> dict[str, str]:
@@ -46,8 +48,10 @@ def per_sample(cohort: str, model: str) -> tuple[pd.DataFrame, pd.Series]:
 def stability(cohort: str, model: str, stage="phase2", variant="main") -> pd.DataFrame:
     s = pd.read_parquet(OUT / f"{stage}_shap_sum.parquet")
     s = s[(s.cohort == cohort) & (s.model == model) & (s.variant == variant) & (s.fs == "F2") & (s.block == "X")]
-    s = s.assign(rank=s.groupby(["repeat", "fold"]).mean_abs.rank(ascending=False, method="first"))
     n_models = s.groupby(["repeat", "fold"]).ngroups
+    # I7: only features the fold-model actually uses (nonzero SHAP) can enter its top 20; ties share a rank.
+    s = s[s.mean_abs > ZERO]
+    s = s.assign(rank=s.groupby(["repeat", "fold"]).mean_abs.rank(ascending=False, method="min"))
     freq = (s[s["rank"] <= TOP].groupby("feature").size() / n_models).rename("top20_freq")
     return freq.to_frame().assign(n_fold_models=n_models)
 
@@ -134,7 +138,7 @@ def main() -> None:
             r["top20_freq"] = r.top20_freq.where(r.block != "X", r.top20_freq.fillna(0.0))
             r["robust"] = (r.block == "X") & (r.top20_freq >= ROBUST)
             r["cluster"] = [cl.get(f) for f in r.index]
-            r["rank_alt"] = r.mean_abs_shap.where(r.block == "X").rank(ascending=False, method="first")
+            r["rank_alt"] = r.mean_abs_shap.where((r.block == "X") & (r.mean_abs_shap > ZERO))                 .rank(ascending=False, method="min")                       # I7: unused -> NaN, ties share
             r = r.rename_axis("feature").reset_index()
             sc = strat[strat.cohort == cohort].set_index("feature")
             r["site_confounded"] = r.feature.map(sc.site_confounded)
@@ -181,16 +185,19 @@ def main() -> None:
 def gate(cohort: str, model: str, r: pd.DataFrame) -> list[dict]:
     rows = []
     x = r[r.block == "X"].set_index("feature")
-    top_alt = x.nsmallest(10, "rank_alt").mean_shap_altered.abs().max()
     for f in M.GATE_POS.get(cohort, []):
         ok = x.at[f, "rank_alt"] <= 10 and x.at[f, "mean_shap_altered"] > 0
         rows.append({"cohort": cohort, "model": model, "variant": "main", "feature": f, "expect": "top 10, toward post",
                      "rank_alt": x.at[f, "rank_alt"], "mean_shap_altered": x.at[f, "mean_shap_altered"],
                      "passed": bool(ok), "gated": True})
+    # I8: negative control passes if its mean SHAP among altered samples lies within an odds ratio of
+    # 0.9-1.1 (log-odds scale; valid for LR and XGBoost, not the probability-scale random forest).
     for f in M.GATE_NEG.get(cohort, []):
-        ok = x.at[f, "rank_alt"] > 10 and abs(x.at[f, "mean_shap_altered"]) < 0.1 * top_alt
+        assert model != "rf", "I8 band is on the log-odds scale; convert before gating a random forest"
+        v = x.at[f, "mean_shap_altered"]
+        ok = NULL_BAND[0] < (0.0 if pd.isna(v) else v) < NULL_BAND[1]
         rows.append({"cohort": cohort, "model": model, "variant": "main", "feature": f,
-                     "expect": "not top 10, |SHAP among altered| < 10% of top-10 max",
+                     "expect": "effect among altered within OR 0.9-1.1 (rank reported only)",
                      "rank_alt": x.at[f, "rank_alt"], "mean_shap_altered": x.at[f, "mean_shap_altered"],
                      "passed": bool(ok), "gated": True})
     # Metastasis-only variant (sens stage): positive controls gated, KRAS reported only.
@@ -200,7 +207,7 @@ def gate(cohort: str, model: str, r: pd.DataFrame) -> list[dict]:
         "mean_abs": g.mean_abs.mean(),
         "mean_altered": np.average(g.mean_altered.fillna(0), weights=g.n_altered) if g.n_altered.sum() else np.nan}),
         include_groups=False)
-    agg["rank_alt"] = agg.mean_abs.rank(ascending=False, method="first")
+    agg["rank_alt"] = agg.mean_abs.where(agg.mean_abs > ZERO).rank(ascending=False, method="min")
     for f in M.GATE_POS.get(cohort, []) + M.GATE_NEG.get(cohort, []):
         pos = f in M.GATE_POS.get(cohort, [])
         ok = (agg.at[f, "rank_alt"] <= 10 and agg.at[f, "mean_altered"] > 0) if pos else None

@@ -43,9 +43,9 @@ room for other work, use fewer cores:
 python train_models.py all --jobs 4
 ```
 
-Step 1 is made of stages, and each stage saves its results only when it
-finishes. If a run is interrupted, the unfinished stage starts over. You can run
-stages one at a time, in this order:
+Step 1 is made of stages. Every finished job is saved as it completes. If a run
+is interrupted, rerun the same command and it picks up where it stopped. You can
+run stages one at a time, in this order:
 
 ```bash
 python train_models.py phase1 select
@@ -54,6 +54,17 @@ python train_models.py lc
 python train_models.py sens
 python train_models.py targetB
 python train_models.py finalize
+```
+
+Target B is optional for the report. Without it, `report_models.py` skips the
+Target B figure and table. To produce Target A results first and add Target B later:
+
+```bash
+python train_models.py phase1 select phase2 lc sens finalize
+python explain.py && python confirm_strict.py && python report_models.py
+# later:
+python train_models.py targetB finalize
+python report_models.py
 ```
 
 To keep a log of a long run:

@@ -1,0 +1,6 @@
+cohort,selected,auc_lr,auc_rf,auc_xgb,rationale
+breast,lr,0.9474934062602339,0.9497204083270225,0.9521472075948263,"rf vs lr: paired gain +0.002, positive in 64% of folds -> kept lr; xgb vs lr: paired gain +0.005, positive in 92% of folds -> kept lr"
+nsclc,lr,0.8582006705155442,0.8584536894560938,0.8675495937859985,"rf vs lr: paired gain +0.000, positive in 56% of folds -> kept lr; xgb vs lr: paired gain +0.009, positive in 64% of folds -> kept lr"
+prostate,lr,0.919211047477266,0.9190871840109933,0.9256806713201287,"rf vs lr: paired gain -0.000, positive in 52% of folds -> kept lr; xgb vs lr: paired gain +0.006, positive in 84% of folds -> kept lr"
+crc,lr,0.8442873074680003,0.8300132628717372,0.8448584516393483,"rf vs lr: paired gain -0.014, positive in 8% of folds -> kept lr; xgb vs lr: paired gain +0.001, positive in 52% of folds -> kept lr"
+pooled,xgb,0.9008443705463135,0.9091156440270198,0.9145270455276632,"rf vs lr: paired gain +0.008, positive in 96% of folds -> kept lr; xgb vs lr: paired gain +0.014, positive in 100% of folds -> moved"

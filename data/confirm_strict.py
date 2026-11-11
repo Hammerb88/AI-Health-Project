@@ -118,7 +118,10 @@ def full_cov_matrix(cohort: str, d: pd.DataFrame) -> np.ndarray:
 
 
 def main() -> None:
-    import tests.test_firth as TF
+    import importlib.util  # load by path: an installed package named "tests" can shadow the local folder
+    spec = importlib.util.spec_from_file_location("test_firth", L.DATA_DIR / "tests" / "test_firth.py")
+    TF = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(TF)
     TF.run_all()
     print("  [ok] 9. Firth validation test passes")
     rank = pd.read_csv(OUT / "shap_ranking.csv")
@@ -131,7 +134,13 @@ def main() -> None:
         ps = d[["cohort", "SAMPLE_ID"]].merge(ps_all, on=["cohort", "SAMPLE_ID"], how="left").prog_score.to_numpy()
         assert np.isfinite(ps).all(), f"[{cohort}] every strict row has a prog_score"
         y = d.label_A.to_numpy().astype(float)
-        feats = [f for f in feature_list(cohort, rank) if d[f].sum() > 0]
+        cand = feature_list(cohort, rank)
+        # A feature altered in no strict row or in every strict row has no estimable odds ratio
+        # (e.g. EGFR_mut in the EGFR-TKI NSCLC cohort).
+        const = [f for f in cand if d[f].sum() in (0, len(d))]
+        if const:
+            print(f"[{cohort}] skipped (no variation in strict rows): {', '.join(const)}")
+        feats = [f for f in cand if f not in const]
         res = Parallel(n_jobs=8)(delayed(fit_one)(cohort, f, d[f].to_numpy(float), y, ps) for f in feats)
         r = pd.DataFrame(res)
         r["q_adj"], r["q_crude"] = bh(r.p_adj), bh(r.p_crude)

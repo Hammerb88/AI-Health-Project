@@ -1,0 +1,106 @@
+  cohort model  variant    feature                                                      expect  rank_alt  mean_shap_altered  passed  gated
+  breast    lr     main   ESR1_LBD                                         top 10, toward post       2.0           0.708959    True   True
+  breast    lr met_only   ESR1_LBD                                         top 10, toward post       3.0           0.239986    True   True
+   nsclc    lr     main EGFR_T790M                                         top 10, toward post       1.0           2.558102    True   True
+   nsclc    lr     main    MET_amp                                         top 10, toward post       2.0           1.681133    True   True
+   nsclc    lr met_only EGFR_T790M                                         top 10, toward post       1.0           2.317412    True   True
+   nsclc    lr met_only    MET_amp                                         top 10, toward post       2.0           0.579806    True   True
+prostate    lr     main     AR_amp                                         top 10, toward post       1.0           1.812976    True   True
+prostate    lr     main     AR_LBD                                         top 10, toward post       4.0           0.720834    True   True
+prostate    lr met_only     AR_amp                                         top 10, toward post       1.0           1.356770    True   True
+prostate    lr met_only     AR_LBD                                         top 10, toward post       4.0           0.794809    True   True
+     crc    lr     main   KRAS_any effect among altered within OR 0.9-1.1 (rank reported only)       9.0           0.003311    True   True
+     crc    lr met_only   KRAS_any                                               reported only       3.0          -0.022058    True  False
+  [ok] gate breast ESR1_LBD (main): rank 2, mean SHAP among altered +0.709
+  [ok] gate breast ESR1_LBD (met_only): rank 3, mean SHAP among altered +0.240
+  [ok] gate nsclc EGFR_T790M (main): rank 1, mean SHAP among altered +2.558
+  [ok] gate nsclc MET_amp (main): rank 2, mean SHAP among altered +1.681
+  [ok] gate nsclc EGFR_T790M (met_only): rank 1, mean SHAP among altered +2.317
+  [ok] gate nsclc MET_amp (met_only): rank 2, mean SHAP among altered +0.580
+  [ok] gate prostate AR_amp (main): rank 1, mean SHAP among altered +1.813
+  [ok] gate prostate AR_LBD (main): rank 4, mean SHAP among altered +0.721
+  [ok] gate prostate AR_amp (met_only): rank 1, mean SHAP among altered +1.357
+  [ok] gate prostate AR_LBD (met_only): rank 4, mean SHAP among altered +0.795
+  [ok] gate crc KRAS_any (main): rank 9, mean SHAP among altered +0.003
+  [ok] 7. control gate passes
+Traceback (most recent call last):
+  File "C:\Users\viv-z\OneDrive - Washington University in St. Louis\Desktop\Intro to AI in Health\AI-Health-Project\data\confirm_strict.py", line 178, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\viv-z\OneDrive - Washington University in St. Louis\Desktop\Intro to AI in Health\AI-Health-Project\data\confirm_strict.py", line 121, in main
+    import tests.test_firth as TF
+ModuleNotFoundError: No module named 'tests.test_firth'
+  [ok] firth: test_large_sample_matches_mle
+  [ok] firth: test_separation_finite
+  [ok] firth: test_two_by_two_haldane
+  [ok] 9. Firth validation test passes
+[breast] 47 features, 2 with adjusted q < 0.1
+joblib.externals.loky.process_executor._RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "C:\Users\viv-z\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\joblib\externals\loky\process_executor.py", line 490, in _process_worker
+    r = call_item()
+  File "C:\Users\viv-z\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\joblib\externals\loky\process_executor.py", line 291, in __call__
+    return self.fn(*self.args, **self.kwargs)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\viv-z\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\joblib\parallel.py", line 607, in __call__
+    return [func(*args, **kwargs) for func, args, kwargs in self.items]
+            ~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\viv-z\OneDrive - Washington University in St. Louis\Desktop\Intro to AI in Health\AI-Health-Project\data\confirm_strict.py", line 99, in fit_one
+    fr = firth_logit(X, y, profile=(1,))
+  File "C:\Users\viv-z\OneDrive - Washington University in St. Louis\Desktop\Intro to AI in Health\AI-Health-Project\data\firth.py", line 76, in firth_logit
+    b, ll, nit = _fit(X, y, max_iter=max_iter)
+                 ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\viv-z\OneDrive - Washington University in St. Louis\Desktop\Intro to AI in Health\AI-Health-Project\data\firth.py", line 54, in _fit
+    step[free] = np.linalg.solve(info[np.ix_(free, free)], Uf)
+                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\viv-z\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\numpy\linalg\_linalg.py", line 452, in solve
+    r = gufunc(a, b, signature=signature)
+  File "C:\Users\viv-z\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\numpy\linalg\_linalg.py", line 145, in _raise_linalgerror_singular
+    raise LinAlgError("Singular matrix")
+numpy.linalg.LinAlgError: Singular matrix
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\viv-z\OneDrive - Washington University in St. Louis\Desktop\Intro to AI in Health\AI-Health-Project\data\confirm_strict.py", line 181, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\viv-z\OneDrive - Washington University in St. Louis\Desktop\Intro to AI in Health\AI-Health-Project\data\confirm_strict.py", line 138, in main
+    res = Parallel(n_jobs=8)(delayed(fit_one)(cohort, f, d[f].to_numpy(float), y, ps) for f in feats)
+  File "C:\Users\viv-z\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\joblib\parallel.py", line 2072, in __call__
+    return output if self.return_generator else list(output)
+                                                ~~~~^^^^^^^^
+  File "C:\Users\viv-z\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\joblib\parallel.py", line 1682, in _get_outputs
+    yield from self._retrieve()
+  File "C:\Users\viv-z\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\joblib\parallel.py", line 1784, in _retrieve
+    self._raise_error_fast()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\viv-z\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\joblib\parallel.py", line 1859, in _raise_error_fast
+    error_job.get_result(self.timeout)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\viv-z\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\joblib\parallel.py", line 758, in get_result
+    return self._return_or_raise()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\viv-z\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\joblib\parallel.py", line 773, in _return_or_raise
+    raise self._result
+numpy.linalg.LinAlgError: Singular matrix
+  [ok] firth: test_large_sample_matches_mle
+  [ok] firth: test_separation_finite
+  [ok] firth: test_two_by_two_haldane
+  [ok] 9. Firth validation test passes
+[breast] 47 features, 2 with adjusted q < 0.1
+[nsclc] skipped (no variation in strict rows): EGFR_mut
+[nsclc] 34 features, 2 with adjusted q < 0.1
+[prostate] 29 features, 4 with adjusted q < 0.1
+[crc] 40 features, 2 with adjusted q < 0.1
+[pooled] 59 features, 8 with adjusted q < 0.1
+agreement  Confirmed  Directional  Discordant  Site-confounded
+cohort                                                        
+breast             2            5           0                1
+nsclc              2            1           0                0
+pooled             8            4           1                1
+prostate           3            1           0                0
+wrote 12 figures and 6 tables to C:\Users\viv-z\OneDrive - Washington University in St. Louis\Desktop\Intro to AI in Health\AI-Health-Project\data\reports\models
+TARGET A FINISHED

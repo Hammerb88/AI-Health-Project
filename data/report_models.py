@@ -41,8 +41,28 @@ def load():
          "sel": pd.read_csv(MD / "selection.csv").set_index("cohort"), "rank": pd.read_csv(MD / "shap_ranking.csv"),
          "firth": pd.read_csv(MD / "firth_strict.csv"), "strat": pd.read_csv(MD / "stratified_enrichment.csv"),
          "share": pd.read_csv(MD / "block_share.csv"), "gate": pd.read_csv(MD / "control_gate.csv"),
-         "clus": pd.read_csv(MD / "shap_clusters.csv"), "selB": pd.read_csv(MD / "selection_targetB.csv")}
+         "clus": pd.read_csv(MD / "shap_clusters.csv")}
+    # Target B is optional: without its outputs, the Target B figures (M11) and table (MT5) are skipped.
+    D["has_B"] = (MD / "selection_targetB.csv").exists() and (D["rep"].stage == "targetB").any()
+    if D["has_B"]:
+        D["selB"] = pd.read_csv(MD / "selection_targetB.csv")
     return D
+
+
+def tables_B(T, rep, fold):
+    """MT5: Target B regression."""
+    rb, fb = rep[rep.stage == "targetB"], fold[fold.stage == "targetB"]
+    k = ["cohort", "target", "variant", "model"]
+    s = summ(rb, fb, "spearman", k).rename(columns={"mean": "spearman", "lo": "rho_fold_lo", "hi": "rho_fold_hi"})
+    for m in ("mae_days", "r2_log"):
+        s = s.merge(rb.groupby(k)[m].mean().rename(m).reset_index(), on=k)
+    cov = s[s.model == "ridge_cov"].set_index(["cohort", "target", "variant"]).mae_days
+    s["delta_mae_vs_cov"] = s.mae_days - s.set_index(["cohort", "target", "variant"]).index.map(cov)
+    n = fb.groupby(["cohort", "target", "variant"]).apply(lambda g: g.groupby(["repeat"]).n_test.sum().iloc[0],
+                                                          include_groups=False).rename("n_rows")
+    s = s.merge(n.reset_index(), on=["cohort", "target", "variant"])
+    s["note"] = np.where(s.cohort == "nsclc", "exploratory (fixed hyperparameters)", "")
+    T["MT5"] = s
 
 
 def summ(rep, fold, metric, keys):
@@ -117,18 +137,8 @@ def tables(D):
          "ci_low_adj", "ci_high_adj", "ci_type_adj", "p_adj", "q_adj", "or_full", "full_moved", "robust", "agreement"]]
     T["MT4"][["ci_low_adj", "ci_high_adj"]] = np.exp(T["MT4"][["ci_low_adj", "ci_high_adj"]])
     # MT5
-    rb, fb = rep[rep.stage == "targetB"], fold[fold.stage == "targetB"]
-    k = ["cohort", "target", "variant", "model"]
-    s = summ(rb, fb, "spearman", k).rename(columns={"mean": "spearman", "lo": "rho_fold_lo", "hi": "rho_fold_hi"})
-    for m in ("mae_days", "r2_log"):
-        s = s.merge(rb.groupby(k)[m].mean().rename(m).reset_index(), on=k)
-    cov = s[s.model == "ridge_cov"].set_index(["cohort", "target", "variant"]).mae_days
-    s["delta_mae_vs_cov"] = s.mae_days - s.set_index(["cohort", "target", "variant"]).index.map(cov)
-    n = fb.groupby(["cohort", "target", "variant"]).apply(lambda g: g.groupby(["repeat"]).n_test.sum().iloc[0],
-                                                          include_groups=False).rename("n_rows")
-    s = s.merge(n.reset_index(), on=["cohort", "target", "variant"])
-    s["note"] = np.where(s.cohort == "nsclc", "exploratory (fixed hyperparameters)", "")
-    T["MT5"] = s
+    if D["has_B"]:
+        tables_B(T, rep, fold)
     # MT6
     rs, fs_ = rep[(rep.stage == "sens") & (rep.eval_rows == "all")], fold[fold.stage == "sens"]
     s = summ(rs, fs_, "auc", ["cohort", "variant", "model", "fs"]).rename(columns={"mean": "roc_auc"})
@@ -294,7 +304,7 @@ def m5(D):
         viz.finish(a, title=NAMES[c], subtitle=f"{M.MODEL_LABEL[m]}, SHAP ({scale})", xlabel="SHAP → toward post")
     ax[0, 0].scatter([], [], s=20, color=viz.SEQ_STEPS[5], label="altered")
     ax[0, 0].scatter([], [], s=20, color=viz.GRID, label="not altered")
-    ax[0, 0].legend(loc="lower left")
+    ax[0, 0].legend(loc="center right")
     fig.suptitle("M5. SHAP for the top 20 alteration features (OOF, mean of 20 repeats); bold = positive / negative control",
                  x=0.01, ha="left", fontsize=11, color=viz.INK)
     fig.tight_layout()
@@ -361,9 +371,11 @@ def m8(D):
         fl = r[r.site_confounded == True]
         pick = fl if len(fl) else r.nlargest(1, "organ_interaction_share")
         rows += [(c, m, f, bool(sc)) for f, sc in zip(pick.feature.head(3), pick.site_confounded.head(3))]
-    n = len(rows)
-    fig, ax = panels(n, w=3.4, h=3.6)
-    for i, (c, m, f, flagged) in enumerate(rows):
+    # Grid: one row per cohort, up to 3 features per row (a single row of 14 panels was unreadable).
+    cohorts = list(dict.fromkeys(r[0] for r in rows))
+    fig, ax = plt.subplots(len(cohorts), 3, figsize=(4.4 * 3, 2.9 * len(cohorts)), squeeze=False)
+    used = set()
+    for (c, m, f, flagged) in rows:
         s = shap_long(c, m)
         s = s[s.feature == f]
         tab = M.load_table(c).set_index("SAMPLE_ID").reindex(s.SAMPLE_ID)
@@ -371,11 +383,14 @@ def m8(D):
         org = tab.biopsy_organ.to_numpy()[alt]
         v = s.shap.to_numpy()[alt]
         top = pd.Series(org).value_counts().head(6).index
-        a = ax[0, i]
-        for j, o in enumerate(top):
+        ri = cohorts.index(c)
+        ci = sum(1 for k in used if k[0] == ri)
+        used.add((ri, ci))
+        a = ax[ri, ci]
+        for j, o in enumerate(top):   # organs are labelled on the y-axis; one color, not one per organ
             vv = v[org == o]
             a.scatter(vv, np.full(len(vv), j) + np.random.default_rng(j).uniform(-0.25, 0.25, len(vv)), s=8,
-                      color=viz.CAT[j % 8], lw=0)
+                      color=viz.SEQ_STEPS[5], alpha=0.7, lw=0)
         a.set_yticks(range(len(top)), top, fontsize=8)
         a.invert_yaxis()
         a.axvline(0, color=viz.AXIS, lw=1)
@@ -383,9 +398,13 @@ def m8(D):
         viz.finish(a, title=f"{NAMES[c]}: {f}",
                    subtitle="flagged site-confounded" if flagged else "highest organ-interaction share (not flagged)",
                    xlabel="SHAP among altered samples")
+    for ri in range(len(cohorts)):
+        for ci in range(3):
+            if (ri, ci) not in used:
+                ax[ri, ci].set_visible(False)
     fig.suptitle("M8. Site dependence: SHAP of altered samples by biopsy organ", x=0.01, ha="left", fontsize=11,
                  color=viz.INK)
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0, 1, 0.975))
     save(fig, "M8_site_interaction")
 
 
@@ -430,17 +449,21 @@ def m10(D):
             g = r[(r.cohort == c) & (r.model == m)].groupby("frac").auc.agg(["mean", "std"])
             ax[0, i].plot(g.index * 100, g["mean"], "-o", color=MCOL[m], ms=6, lw=2, label=M.MODEL_LABEL[m])
             s = ss[(ss.cohort == c) & (ss.model == m)]
-            top = s.assign(rk=s.groupby(["repeat", "fold", "frac"]).mean_abs.rank(ascending=False, method="first"))
+            # I7: only features the fold-model uses (nonzero SHAP) can be in its top 20; ties share a rank.
+            s = s[s.mean_abs > 1e-10]
+            top = s.assign(rk=s.groupby(["repeat", "fold", "frac"]).mean_abs.rank(ascending=False, method="min"))
             top = top[top.rk <= 20]
             full = top[top.frac == 1.0].groupby(["repeat", "fold"]).feature.apply(set)
             ov = top.groupby(["frac", "repeat", "fold"]).feature.apply(set).reset_index()
-            ov["overlap"] = [len(f & full.loc[(rp, fo)]) / 20 for f, rp, fo in zip(ov.feature, ov.repeat, ov.fold)]
-            o = ov.groupby("frac").overlap.mean()
+            ov["overlap"] = [len(f & full[(rp, fo)]) / len(full[(rp, fo)]) if (rp, fo) in full.index else np.nan
+                             for f, rp, fo in zip(ov.feature, ov.repeat, ov.fold)]
+            o = ov.groupby("frac").overlap.mean()   # fold-models with no feature in use at 100% are skipped
             ax[1, i].plot(o.index * 100, o, "-o", color=MCOL[m], ms=6, lw=2)
         viz.finish(ax[0, i], title=NAMES[c], ylabel="ROC-AUC" if i == 0 else None)
         viz.finish(ax[1, i], xlabel="% of training fold", ylabel="Top-20 overlap with 100%" if i == 0 else None)
         ax[1, i].set_ylim(0, 1.05)
     ax[0, 0].legend(loc="lower right")
+    ax[0, 4].legend(loc="lower right")
     fig.suptitle("M10. Learning curve (repeats r00–r04): AUC and top-20 SHAP overlap vs training size", x=0.01,
                  ha="left", fontsize=11, color=viz.INK)
     fig.tight_layout()
@@ -570,7 +593,8 @@ def readme(D, T):
             ("M5_shap_beeswarm", "SHAP beeswarm"), ("M6_importance_stability", "Importance and stability"),
             ("M7_block_share", "Block share"), ("M8_site_interaction", "Site interaction"),
             ("M9_strict_confirmation", "Strict-tier confirmation"), ("M10_learning_curve", "Learning curve"),
-            ("M11a_targetB_pred_obs", "Target B predicted vs observed"), ("M11b_targetB_shap", "Target B SHAP"),
+            *([("M11a_targetB_pred_obs", "Target B predicted vs observed"), ("M11b_targetB_shap", "Target B SHAP")]
+              if D["has_B"] else []),
             ("M12a_stratified_auc", "Stratified AUC"), ("M12b_stratified_enrichment", "Stratified enrichment")]
     md += ["## Figures", ""]
     for f, cap in figs:
@@ -585,11 +609,13 @@ def readme(D, T):
            fmt_table(T["MT4"], ["cohort", "feature", "n_altered_pre", "n_altered_post", "or_crude", "or_adj",
                                 "ci_low_adj", "ci_high_adj", "ci_type_adj", "q_adj", "or_full", "full_moved",
                                 "robust", "agreement"]), "",
-           "### MT5. Target B regression (repeats r00–r04)", "",
-           fmt_table(T["MT5"], ["cohort", "target", "variant", "model", "n_rows", "spearman", "rho_fold_lo",
-                                "rho_fold_hi", "mae_days", "delta_mae_vs_cov", "r2_log", "note"]), "",
-           "`target` B = log1p(cumulative days on class); B_t = log1p(days since first dose). `B_main` excludes "
-           "post samples with < 30 recorded days; `B_all` keeps them.", "",
+           *(["### MT5. Target B regression (repeats r00–r04)", "",
+              fmt_table(T["MT5"], ["cohort", "target", "variant", "model", "n_rows", "spearman", "rho_fold_lo",
+                                   "rho_fold_hi", "mae_days", "delta_mae_vs_cov", "r2_log", "note"]), "",
+              "`target` B = log1p(cumulative days on class); B_t = log1p(days since first dose). `B_main` excludes "
+              "post samples with < 30 recorded days; `B_all` keeps them.", ""] if D["has_B"] else
+             ["### MT5. Target B regression", "", "Not run yet: `python train_models.py targetB finalize`, "
+              "then rerun this script.", ""]),
            "### MT6. Sensitivity analyses (selected model, repeats r00–r04)", "",
            fmt_table(T["MT6"], ["cohort", "variant", "model", "fs", "n", "pct_post", "roc_auc", "lo", "hi",
                                 "auc_main_same_model"]), "",
@@ -610,7 +636,7 @@ def main():
     oof = pd.read_parquet(MD / "oof_predictions.parquet",
                           filters=[("stage", "in", ["phase2", "targetB"])])
     for f in (lambda: m1(D, T), lambda: m2(D, T), lambda: m3(D, oof), lambda: m4(D, oof), lambda: m5(D),
-              lambda: m6(D), lambda: m7(D), lambda: m8(D), lambda: m9(D), lambda: m10(D), lambda: m11(D, oof),
+              lambda: m6(D), lambda: m7(D), lambda: m8(D), lambda: m9(D), lambda: m10(D), *([lambda: m11(D, oof)] if D['has_B'] else []),
               lambda: m12(D, T)):
         f()
     readme(D, T)

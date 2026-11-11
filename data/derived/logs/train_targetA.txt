@@ -1,0 +1,47 @@
+[lc] 24 specs, 120 jobs
+[lc] resuming: 8 finished jobs found in checkpoints
+[Parallel(n_jobs=8)]: Using backend LokyBackend with 8 concurrent workers.
+[Parallel(n_jobs=8)]: Done   2 tasks      | elapsed:    3.0s
+[Parallel(n_jobs=8)]: Done  56 tasks      | elapsed: 65.5min
+[Parallel(n_jobs=8)]: Done 120 out of 120 | elapsed: 68.3min finished
+[lc] done in 68.3 min
+[sens] 42 specs, 210 jobs
+[Parallel(n_jobs=8)]: Using backend LokyBackend with 8 concurrent workers.
+[Parallel(n_jobs=8)]: Done   2 tasks      | elapsed:  6.1min
+[Parallel(n_jobs=8)]: Done  56 tasks      | elapsed: 30.1min
+[Parallel(n_jobs=8)]: Done 146 tasks      | elapsed: 37.0min
+[Parallel(n_jobs=8)]: Done 210 out of 210 | elapsed: 38.3min finished
+[sens] done in 38.4 min
+finalize: wrote oof_predictions, metrics_folds, best_params, metrics_repeats
+  cohort model  variant    feature                                               expect  rank_alt  mean_shap_altered  passed  gated
+  breast    lr     main   ESR1_LBD                                  top 10, toward post       2.0           0.708959    True   True
+  breast    lr met_only   ESR1_LBD                                  top 10, toward post       3.0           0.239986    True   True
+   nsclc    lr     main EGFR_T790M                                  top 10, toward post       1.0           2.558102    True   True
+   nsclc    lr     main    MET_amp                                  top 10, toward post       2.0           1.681133    True   True
+   nsclc    lr met_only EGFR_T790M                                  top 10, toward post       1.0           2.317412    True   True
+   nsclc    lr met_only    MET_amp                                  top 10, toward post       2.0           0.579806    True   True
+prostate    lr     main     AR_amp                                  top 10, toward post       1.0           1.812976    True   True
+prostate    lr     main     AR_LBD                                  top 10, toward post       4.0           0.720834    True   True
+prostate    lr met_only     AR_amp                                  top 10, toward post       1.0           1.356770    True   True
+prostate    lr met_only     AR_LBD                                  top 10, toward post       4.0           0.794809    True   True
+     crc    lr     main   KRAS_any not top 10, |SHAP among altered| < 10% of top-10 max      10.0           0.003311   False   True
+     crc    lr met_only   KRAS_any                                        reported only       3.0          -0.022058    True  False
+  [ok] gate breast ESR1_LBD (main): rank 2, mean SHAP among altered +0.709
+  [ok] gate breast ESR1_LBD (met_only): rank 3, mean SHAP among altered +0.240
+  [ok] gate nsclc EGFR_T790M (main): rank 1, mean SHAP among altered +2.558
+  [ok] gate nsclc MET_amp (main): rank 2, mean SHAP among altered +1.681
+  [ok] gate nsclc EGFR_T790M (met_only): rank 1, mean SHAP among altered +2.317
+  [ok] gate nsclc MET_amp (met_only): rank 2, mean SHAP among altered +0.580
+  [ok] gate prostate AR_amp (main): rank 1, mean SHAP among altered +1.813
+  [ok] gate prostate AR_LBD (main): rank 4, mean SHAP among altered +0.721
+  [ok] gate prostate AR_amp (met_only): rank 1, mean SHAP among altered +1.357
+  [ok] gate prostate AR_LBD (met_only): rank 4, mean SHAP among altered +0.795
+  [FAIL] gate crc KRAS_any (main): rank 10, mean SHAP among altered +0.003
+Traceback (most recent call last):
+  File "C:\Users\viv-z\OneDrive - Washington University in St. Louis\Desktop\Intro to AI in Health\AI-Health-Project\data\explain.py", line 215, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\viv-z\OneDrive - Washington University in St. Louis\Desktop\Intro to AI in Health\AI-Health-Project\data\explain.py", line 177, in main
+    assert gated.passed.all(), "6.5 control gate failed: stop and debug before writing figures"
+           ~~~~~~~~~~~~~~~~^^
+AssertionError: 6.5 control gate failed: stop and debug before writing figures

@@ -2,3 +2,13 @@
 [Parallel(n_jobs=8)]: Done   2 tasks      | elapsed:  2.1min
 [Parallel(n_jobs=8)]: Done  56 tasks      | elapsed: 42.0min
 [Parallel(n_jobs=8)]: Done 146 tasks      | elapsed: 186.0min
+[Parallel(n_jobs=8)]: Done 272 tasks      | elapsed: 7102.4min
+[Parallel(n_jobs=8)]: Done 325 out of 325 | elapsed: 7103.8min finished
+[phase1] 65 specs, 325 jobs
+[phase1] done in 7103.8 min
+  cohort selected   auc_lr   auc_rf  auc_xgb
+  breast       lr 0.947493 0.949720 0.952147
+   nsclc       lr 0.858201 0.858454 0.867550
+prostate       lr 0.919211 0.919087 0.925681
+     crc       lr 0.844287 0.830013 0.844858
+  pooled      xgb 0.900844 0.909116 0.914527

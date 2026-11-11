@@ -16,8 +16,13 @@ Run: ``python train_models.py all`` or ``python train_models.py phase1 select ..
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import os
+import shutil
 import time
+
+import joblib
 
 import numpy as np
 import pandas as pd
@@ -28,7 +33,24 @@ import m3_common as M
 
 OUT = M.MODELS_DIR
 SHAP_DIR = OUT / "shap"
+CKPT_DIR = OUT / "_checkpoints"
 N_JOBS = 8
+
+
+def cached_job(spec: dict, repeat: str) -> dict:
+    """Run one job, or load it if a previous (interrupted) run already finished it.
+    Each finished job is saved to derived/models/_checkpoints/<stage>/; the folder is
+    removed once the stage has written its combined outputs."""
+    h = hashlib.sha1(json.dumps([spec, repeat], sort_keys=True, default=str).encode()).hexdigest()[:16]
+    f = CKPT_DIR / spec["stage"] / f"{h}.pkl"
+    if f.exists():
+        return joblib.load(f)
+    res = run_job(spec, repeat)
+    f.parent.mkdir(parents=True, exist_ok=True)
+    tmp = f.with_suffix(f".tmp{os.getpid()}")
+    joblib.dump(res, tmp)
+    os.replace(tmp, f)
+    return res
 
 
 # --------------------------------------------------------------------------
@@ -124,7 +146,10 @@ def run_stage(stage: str, specs: list[dict], repeats: list[str]) -> None:
     weight = {"pooled": 4, "breast": 2, "crc": 2, "prostate": 1, "nsclc": 0.5}
     jobs.sort(key=lambda j: -(weight[j[0]["cohort"]] * {"rf": 3, "xgb": 2}.get(j[0]["model"], 1)))
     print(f"[{stage}] {len(specs)} specs, {len(jobs)} jobs")
-    res = Parallel(n_jobs=N_JOBS, verbose=5)(delayed(run_job)(s, r) for s, r in jobs)
+    done = len(list((CKPT_DIR / stage).glob("*.pkl"))) if (CKPT_DIR / stage).exists() else 0
+    if done:
+        print(f"[{stage}] resuming: {done} finished jobs found in checkpoints")
+    res = Parallel(n_jobs=N_JOBS, verbose=5)(delayed(cached_job)(s, r) for s, r in jobs)
     OUT.mkdir(parents=True, exist_ok=True)
     SHAP_DIR.mkdir(parents=True, exist_ok=True)
     for part in ("oof", "folds", "params", "shap_sum", "inter"):
@@ -138,6 +163,7 @@ def run_stage(stage: str, specs: list[dict], repeats: list[str]) -> None:
     for (co, mo, fs, va, ta), frames in full.items():
         pd.concat(frames, ignore_index=True).to_parquet(
             SHAP_DIR / f"{stage}_{co}_{ta}_{mo}_{fs}_{va}.parquet", index=False)
+    shutil.rmtree(CKPT_DIR / stage, ignore_errors=True)
     print(f"[{stage}] done in {(time.time() - t0) / 60:.1f} min")
 
 
