@@ -5,3 +5,7 @@ __pycache__/
 # Re-extract from the tarballs or download from cBioPortal (links in README).
 data/raw/
 data/*.tar.gz
+
+# Machine-specific run files
+data/derived/logs/suspended_pids.txt
+data/derived/models/_checkpoints/
